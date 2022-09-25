@@ -6,8 +6,9 @@
     <WarnOn>3390;$(WarnOn)</WarnOn>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="paket.references" />
     <Compile Include="FMQTT.fs" />
+    <Compile Include="Example.fs" />
+    <None Include="paket.references" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MQTTnet" Version="4.1.0.247" />
