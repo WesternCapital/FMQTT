@@ -4,6 +4,9 @@ open MQTTnet.Client
 open MQTTnet
 open System.Threading
 open System.Threading.Tasks
+open MQTTnet
+open System
+open MQTTnet.Packets
 
 module FMQTT = 
     type MyMQTT =
@@ -32,12 +35,15 @@ module FMQTT =
         
         member this.SubscribeToTopic (topic: string) (fn: string -> unit) = 
             let sub = this.Factory.CreateSubscribeOptionsBuilder() |> fun x -> x.WithTopicFilter(fun f -> f.WithTopic(topic) |> ignore).Build()
-            this.Client.SubscribeAsync(sub, CancellationToken.None).Wait()
+            //this.Client.SubscribeAsync((new MqttTopicFilterBuilder()).WithTopic(topic).Build()).Wait()
+            //this.Client.SubscribeAsync(sub, CancellationToken.None).Wait()
+            this.Client.SubscribeAsync(topic).Wait()
             this.Client.add_ApplicationMessageReceivedAsync(fun x -> 
                 let y = x.ApplicationMessage.ConvertPayloadToString()
                 fn y
                 Task.CompletedTask
             )
+        member this.SubscribeToTopicBasic (topic: string) (fn: string -> obj) = this.Client.SubscribeAsync(topic).Wait()
         member this.PublishMessage (topic: string) (data: string) = 
             let amb = (new MqttApplicationMessageBuilder()).WithTopic(topic).WithPayload(data).Build()
             printfn "Sending message to mqtt..."
