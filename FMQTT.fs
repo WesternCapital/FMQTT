@@ -25,9 +25,9 @@ module FMQTT =
         static member SetCredentials (user: string) (pass: string) (mq: MyMQTT) = {mq with OptionsBuilder = mq.OptionsBuilder.WithCredentials(user, pass)}
         static member UseTLS (mq: MyMQTT) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTls()}
         static member Connect (mq: MyMQTT) = 
-            printf "Connecting to broker... "
+            //printf "Connecting to broker... "
             mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
-            printfn "Connected!"
+            //printfn "Connected!"
             mq
         
         member this.SubscribeToTopic (topic: string) (fn: string -> unit) = 
@@ -40,5 +40,5 @@ module FMQTT =
             )
         member this.PublishMessage (topic: string) (data: string) = 
             let amb = (new MqttApplicationMessageBuilder()).WithTopic(topic).WithPayload(data).Build()
-            printfn "Sending message to mqtt..."
+            //printfn "Sending message to mqtt..."
             this.Client.PublishAsync(amb, CancellationToken.None) |> ignore
