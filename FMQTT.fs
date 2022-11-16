@@ -14,8 +14,8 @@ open System.Collections.Generic
 module FMQTT = 
     type ClientModel<'a> = 
         {
-            NoLocal           : bool
-            RetainAsPublished : bool
+            NoLocal : bool
+            Retain : bool
             Topic: string
             OnChangeWeak: string -> unit
             OnChangeStrong: 'a -> unit
@@ -24,16 +24,16 @@ module FMQTT =
         static member Create topic =
             {
                 NoLocal = false
-                RetainAsPublished = false
+                Retain = false
                 OnChangeStrong = ignore
                 OnChangeWeak = ignore
                 SendOnSubcribe = MqttRetainHandling.DoNotSendOnSubscribe
                 Topic = topic
             }
     type ClientBuilder =
-        static member NoLocal            (b: ClientModel<_>) = { b with NoLocal            = true }
-        static member SendOnSubcribe            (b: ClientModel<_>) = { b with SendOnSubcribe            = MqttRetainHandling.SendAtSubscribeIfNewSubscriptionOnly }
-        static member RetainAsPublished  (b: ClientModel<_>) = { b with RetainAsPublished  = true }
+        static member NoLocal (b: ClientModel<_>) = { b with NoLocal            = true }
+        static member SendOnSubcribe  (b: ClientModel<_>) = { b with SendOnSubcribe            = MqttRetainHandling.SendAtSubscribeIfNewSubscriptionOnly }
+        static member Retain  (b: ClientModel<_>) = { b with Retain  = true }
         static member Topic x (b: ClientModel<_>) = { b with Topic = x }
         static member OnChange (x: 'a -> unit) (b: ClientModel<'a>) = { b with OnChangeStrong = x }
 
@@ -87,7 +87,7 @@ module FMQTT =
                 |> fun x -> 
                     MqttTopicFilterBuilder()
                     |> fun x -> x.WithRetainHandling b.SendOnSubcribe
-                    |> fun x -> x.WithRetainAsPublished b.RetainAsPublished
+                    |> fun x -> x.WithRetainAsPublished b.Retain
                     |> fun x -> x.WithTopic b.Topic
                     |> fun x -> x.WithNoLocal b.NoLocal
                     |> x.WithTopicFilter
@@ -100,21 +100,13 @@ module FMQTT =
             )
         member this.SubscribeToTopic (topic: string) (fn: MqttApplicationMessageReceivedEventArgs -> unit) = 
             let sub = this.Factory.CreateSubscribeOptionsBuilder() |> fun x -> x.WithTopicFilter(fun f -> f.WithTopic(topic) |> ignore).Build()
-            //this.Client.SubscribeAsync((new MqttTopicFilterBuilder()).WithTopic(topic).Build()).Wait()
-            //this.Client.SubscribeAsync(sub, CancellationToken.None).Wait()
             this.EventHandlers.Add(topic, fn)
             this.Client.SubscribeAsync(topic).Wait()
 
-        //member this.SubscribeToTopic (topic: string) (fn: string -> unit) = 
-        //    let sub = this.Factory.CreateSubscribeOptionsBuilder() |> fun x -> x.WithTopicFilter(fun f -> f.WithTopic(topic) |> ignore).Build()
-        //    //this.Client.SubscribeAsync((new MqttTopicFilterBuilder()).WithTopic(topic).Build()).Wait()
-        //    //this.Client.SubscribeAsync(sub, CancellationToken.None).Wait()
-        //    this.EventHandlers.Add(topic, fn)
-        //    this.Client.SubscribeAsync(topic).Wait()
-
-        member this.SubscribeToTopicBasic (topic: string) (fn: string -> obj) = this.Client.SubscribeAsync(topic).Wait()
+        member this.SubscribeToTopicBasic (topic: string) (fn: string -> unit) = this.SubscribeToTopic topic (fun x -> x.ApplicationMessage.ConvertPayloadToString() |> fn)
 
         member this.PublishMessage (topic: string) (data: string) = 
             let amb = (new MqttApplicationMessageBuilder()).WithRetainFlag().WithTopic(topic).WithPayload(data).Build()
             //printfn "Sending message to mqtt..."
             this.Client.PublishAsync(amb, CancellationToken.None) |> ignore
+   

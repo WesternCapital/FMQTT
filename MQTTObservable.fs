@@ -161,7 +161,7 @@ module MQTTObservable =
         static member CreateRetained<'a> (s: 'a -> string) (d: string -> 'a) (onChange: 'a -> unit) (iv: 'a) (topic: string) =
             ClientModel.Create<'a> topic
             |> ClientBuilder.SendOnSubcribe
-            |> ClientBuilder.RetainAsPublished
+            |> ClientBuilder.Retain
             |> ClientBuilder.OnChange onChange
             |> MQTTObservableGeneric.Create s d iv
 
@@ -178,3 +178,26 @@ module MQTTObservable =
                 defaultValue
                 topic
     
+        static member CreateRetainedInt (onChange: int -> unit) defaultValue topic : MQTTObservableGeneric<int> = 
+            MQTTObservableGeneric.CreateRetained<int>
+                (fun i -> i.ToString())
+                (fun i ->
+                    System.Int32.TryParse i
+                    |> function
+                    | true, i -> i
+                    | false, _ -> 0
+                    ) 
+                onChange 
+                defaultValue
+                topic
+    
+    
+    //MyMQTT.New
+    //|> MyMQTT.SetBrokerName "test.mosquitto.org"
+    //|> MyMQTT.SetUrl "test.mosquitto.org" 1883
+    //|> MyMQTT.SetCredentials "wildcard" ""
+    //|> MyMQTT.Connect
+    //|> fun x -> 
+    //    let obs1 = x.CreateObservable "a"
+    //    let obs2 = x.CreateObservable "b"
+    //    let obs3 = x.CreateObservable "c"
