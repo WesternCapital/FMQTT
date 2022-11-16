@@ -50,7 +50,7 @@ module FMQTT =
         static member Connect (mq: MyMQTT) = 
             printf $"Connecting to broker: {mq.BrokerName}..."
             mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
-            printfn "Connected!"
+            //printfn "Connected!"
             mq
         member this.SubscribeToTopic (topic: string) (fn: MqttApplicationMessageReceivedEventArgs -> unit) = 
             let sub = this.Factory.CreateSubscribeOptionsBuilder() |> fun x -> x.WithTopicFilter(fun f -> f.WithTopic(topic) |> ignore).Build()
@@ -61,5 +61,5 @@ module FMQTT =
         member this.SubscribeToTopicBasic (topic: string) (fn: string -> obj) = this.Client.SubscribeAsync(topic).Wait()
         member this.PublishMessage (topic: string) (data: string) = 
             let amb = (new MqttApplicationMessageBuilder()).WithTopic(topic).WithPayload(data).Build()
-            printfn "Sending message to mqtt..."
+            //printfn "Sending message to mqtt..."
             this.Client.PublishAsync(amb, CancellationToken.None) |> ignore
