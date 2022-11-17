@@ -2,7 +2,6 @@
 
 open MQTTnet.Client
 open MQTTnet
-//open Protocol
 open MQTTnet.Protocol
 open System.Threading
 open System.Threading.Tasks
@@ -10,8 +9,19 @@ open MQTTnet
 open System
 open MQTTnet.Packets
 open System.Collections.Generic
+open Utils
+open System.Linq
 
 module FMQTT = 
+    
+    let tee (x: 'obj -> unit) (y: 'obj) : 'obj =
+        x y
+        y
+    let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) = System.Text.Encoding.ASCII.GetString(x.ApplicationMessage.Payload)
+    let (|--) a b = a |> tee b
+
+    type MQTTMessageEventArgs = MqttApplicationMessageReceivedEventArgs
+        
     type ClientModel<'a> = 
         {
             NoLocal : bool
@@ -30,20 +40,13 @@ module FMQTT =
                 SendOnSubcribe = MqttRetainHandling.DoNotSendOnSubscribe
                 Topic = topic
             }
+
     type ClientBuilder =
-        static member NoLocal (b: ClientModel<_>) = { b with NoLocal            = true }
-        static member SendOnSubcribe  (b: ClientModel<_>) = { b with SendOnSubcribe            = MqttRetainHandling.SendAtSubscribeIfNewSubscriptionOnly }
-        static member Retain  (b: ClientModel<_>) = { b with Retain  = true }
-        static member Topic x (b: ClientModel<_>) = { b with Topic = x }
-        static member OnChange (x: 'a -> unit) (b: ClientModel<'a>) = { b with OnChangeStrong = x }
-
-    let tee (x: 'obj -> unit) (y: 'obj) : 'obj =
-        x y
-        y
-    let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) = System.Text.Encoding.ASCII.GetString(x.ApplicationMessage.Payload)
-    let (|--) a b = a |> tee b
-
-    type MQTTMessageEventArgs = MqttApplicationMessageReceivedEventArgs
+        static member NoLocal (b: ClientModel<_>)         = { b with NoLocal        = true }
+        static member SendOnSubcribe (b: ClientModel<_>)  = { b with SendOnSubcribe = MqttRetainHandling.SendAtSubscribeIfNewSubscriptionOnly }
+        static member Retain (b: ClientModel<_>)          = { b with Retain         = true }
+        static member Topic x (b: ClientModel<_>)         = { b with Topic          = x }
+        static member OnChange fn (b: ClientModel<'a>)    = { b with OnChangeStrong = fn }
 
     type MyMQTT =
         {
@@ -93,11 +96,21 @@ module FMQTT =
                     |> x.WithTopicFilter
                     |> fun x -> x.Build()
             this.Client.SubscribeAsync(sub, CancellationToken.None).Wait()
-            this.Client.add_ApplicationMessageReceivedAsync(fun x -> 
-                let y = x.ApplicationMessage.ConvertPayloadToString()
-                b.OnChangeWeak y
-                Task.CompletedTask
-            )
+            if this.EventHandlers.ContainsKey b.Topic then
+                let x = 5
+                let o = this.EventHandlers.[b.Topic] 
+                this.EventHandlers.[b.Topic] <- (fun x -> o x; x.ApplicationMessage.ConvertPayloadToString() |> b.OnChangeWeak)
+                
+            else
+                let x = 5
+                this.EventHandlers.Add(b.Topic, 
+                    fun x -> 
+                        x.ApplicationMessage.ConvertPayloadToString() |> b.OnChangeWeak)
+            //this.Client.add_ApplicationMessageReceivedAsync(fun x -> 
+            //    let y = x.ApplicationMessage.ConvertPayloadToString()
+            //    b.OnChangeWeak y
+            //    Task.CompletedTask
+            //)
         member this.SubscribeToTopic (topic: string) (fn: MqttApplicationMessageReceivedEventArgs -> unit) = 
             let sub = this.Factory.CreateSubscribeOptionsBuilder() |> fun x -> x.WithTopicFilter(fun f -> f.WithTopic(topic) |> ignore).Build()
             this.EventHandlers.Add(topic, fn)
@@ -108,5 +121,143 @@ module FMQTT =
         member this.PublishMessage (topic: string) (data: string) = 
             let amb = (new MqttApplicationMessageBuilder()).WithRetainFlag().WithTopic(topic).WithPayload(data).Build()
             //printfn "Sending message to mqtt..."
-            this.Client.PublishAsync(amb, CancellationToken.None) |> ignore
+            try
+                this.Client.PublishAsync(amb, CancellationToken.None) |> ignore
+            with ex -> 
+                this.Client.ConnectAsync(this.OptionsBuilder.Build(), CancellationToken.None).Wait()
+                this.PublishMessage topic data
+                //let n x = ()
+                //n ex
+                //()
    
+        static member ConnectToEnvironmentMQTT() =
+            let envVar n =
+                let getVar userLevel = 
+                    let k = $"MQTT_{n}"
+                    let envVars = System.Environment.GetEnvironmentVariables(userLevel)
+                    if envVars.Contains k then Some <| envVars.[k].ToString()
+                    else None 
+                    //System.Environment.GetEnvironmentVariable(k, u)
+                getVar EnvironmentVariableTarget.User
+                |> function
+                | None -> getVar EnvironmentVariableTarget.Machine
+                | Some x -> Some x
+                |> Option.defaultValue ""
+            let vars = 
+                {|
+                    URL = envVar "URL" 
+                    Port = envVar "Port" |> parseInt |> function Some x -> x | _ -> 0
+                    User = envVar "User" 
+                    Password = envVar "Password"
+                |}
+            MyMQTT.New
+            |> MyMQTT.SetUrl vars.URL vars.Port
+            |> MyMQTT.SetCredentials  vars.User vars.Password
+            |> MyMQTT.Connect
+    
+    type MQTTObservableGeneric<'a> private () =
+        member val private backingValue : 'a option = None with get, set
+        member val private initVal : 'a option = None with get, set
+        member val private clientModel = ClientModel.Create<'a> "" with get, set
+        member val private serializer : 'a -> string = (fun x -> x.ToString()) with get, set
+        member val private deserializer : string -> 'a = (fun x -> failwith "needs fn") with get, set
+        member val private hasReceivedCallback : bool = false with get, set
+        member val private client : MyMQTT option = None with get,set
+        
+        member private this.SetBackingValue v = this.backingValue <- Some v
+        
+        member this.Init() : unit =
+            let onChange (stringToDeserialize: string) : unit = 
+                let noopp x = x
+                try 
+                    this.deserializer stringToDeserialize
+                with ex -> 
+                    noopp ex |> ignore
+                    this.initVal.Value
+                |> this.SetBackingValue
+                this.backingValue.Value
+                |> fun x -> x
+                |> this.clientModel.OnChangeStrong
+                |> fun x -> x
+                this.hasReceivedCallback <- true
+            this.client.Value.SubscribeToTopicWithModel
+                { this.clientModel with OnChangeWeak = onChange }
+            ()
+        
+        member this.SetValue v = this.Value <- v
+        
+        member this.Publish() = this.client.Value.PublishMessage this.clientModel.Topic (this.serializer this.backingValue.Value)
+        
+        member this.Value
+            with get() = this.backingValue.Value
+            and set(stringValue) = 
+                this.SetBackingValue stringValue
+                this.Publish()
+
+        member this.WaitForCallback (ms: int) =
+            let start = DateTime.Now
+            let ms = (float ms)
+            while this.hasReceivedCallback |> not && DateTime.Now.Subtract(start).TotalMilliseconds < ms do
+                System.Threading.Thread.Sleep 10
+            let noop x = 
+                ()
+            noop ((DateTime.Now.Subtract(start).TotalMilliseconds), this.hasReceivedCallback)
+            if this.hasReceivedCallback |> not then
+                this.SetBackingValue this.initVal.Value
+            
+        static member Create m (s: 'a -> string) (d: string -> 'a) (initVal: 'a) (client: ClientModel<'a>) =
+            let t = new MQTTObservableGeneric<'a>()
+            t.clientModel <- client
+            t.serializer <- s
+            t.deserializer <- d
+            t.initVal <- Some initVal
+            t.client <- Some m
+            t.Init()
+            client.SendOnSubcribe
+            |> function
+            | MqttRetainHandling.SendAtSubscribe
+            | MqttRetainHandling.SendAtSubscribeIfNewSubscriptionOnly -> 
+                t.WaitForCallback 1000
+                let q = t.hasReceivedCallback
+                if t.backingValue.IsNone  then 
+                    t.SetBackingValue t.initVal.Value
+                if not q then t.SetValue t.initVal.Value
+            | MqttRetainHandling.DoNotSendOnSubscribe -> 
+                t.Value <- initVal
+            | _ -> ()
+            t
+        
+        static member CreateRetained<'a> m (s: 'a -> string) (d: string -> 'a) (onChange: 'a -> unit) (iv: 'a) (topic: string) =
+            ClientModel.Create<'a> topic
+            |> ClientBuilder.SendOnSubcribe
+            |> ClientBuilder.Retain
+            |> ClientBuilder.OnChange onChange
+            |> MQTTObservableGeneric.Create m s d iv
+
+        static member CreateRetainedBool m (onChange: bool -> unit) defaultValue topic : MQTTObservableGeneric<bool> = 
+            MQTTObservableGeneric.CreateRetained<bool>
+                m
+                (fun (x: bool) -> x.ToString()) 
+                (fun s ->
+                    System.Boolean.TryParse s
+                    |> function
+                    | true, x -> x
+                    | false, _ -> false
+                    ) 
+                onChange 
+                defaultValue
+                topic
+    
+        static member CreateRetainedInt m (onChange: int -> unit) defaultValue topic : MQTTObservableGeneric<int> = 
+            MQTTObservableGeneric.CreateRetained<int>
+                m
+                (fun i -> i.ToString())
+                (fun i ->
+                    System.Int32.TryParse i
+                    |> function
+                    | true, i -> i
+                    | false, _ -> 0
+                    ) 
+                onChange 
+                defaultValue
+                topic

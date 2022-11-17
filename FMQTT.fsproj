@@ -6,8 +6,8 @@
     <WarnOn>3390;$(WarnOn)</WarnOn>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Utils.fs" />
     <Compile Include="FMQTT.fs" />
-    <Compile Include="MQTTObservable.fs" />
     <Compile Include="Example.fs" />
     <None Include="paket.references" />
   </ItemGroup>
