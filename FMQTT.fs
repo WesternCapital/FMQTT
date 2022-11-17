@@ -11,7 +11,7 @@ open MQTTnet.Packets
 open System.Collections.Generic
 open Utils
 open System.Linq
-
+[<AutoOpen>]
 module FMQTT = 
     
     let tee (x: 'obj -> unit) (y: 'obj) : 'obj =
@@ -48,7 +48,7 @@ module FMQTT =
         static member Topic x (b: ClientModel<_>)         = { b with Topic          = x }
         static member OnChange fn (b: ClientModel<'a>)    = { b with OnChangeStrong = fn }
 
-    type MyMQTT =
+    type MqttConnection =
         {
             BrokerName: string
             Factory: MqttFactory
@@ -73,12 +73,12 @@ module FMQTT =
                             x.EventHandlers.[xx.ApplicationMessage.Topic] xx
                         Task.CompletedTask
                     )
-        static member SetBrokerName (bn: string) (mq: MyMQTT) = {mq with BrokerName = bn}
-        static member SetClientId (clientId: string) (mq: MyMQTT) = {mq with OptionsBuilder = mq.OptionsBuilder.WithClientId(clientId)}
-        static member SetUrl (url: string) (port: int) (mq: MyMQTT) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTcpServer(url, port)}
-        static member SetCredentials (user: string) (pass: string) (mq: MyMQTT) = {mq with OptionsBuilder = mq.OptionsBuilder.WithCredentials(user, pass)}
-        static member UseTLS (mq: MyMQTT) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTls()}
-        static member Connect (mq: MyMQTT) = 
+        static member SetBrokerName (bn: string) (mq: MqttConnection) = {mq with BrokerName = bn}
+        static member SetClientId (clientId: string) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithClientId(clientId)}
+        static member SetUrl (url: string) (port: int) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTcpServer(url, port)}
+        static member SetCredentials (user: string) (pass: string) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithCredentials(user, pass)}
+        static member UseTLS (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTls()}
+        static member Connect (mq: MqttConnection) = 
             //printf $"Connecting to broker: {mq.BrokerName}..."
             mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
             //printfn "Connected!"
@@ -150,10 +150,10 @@ module FMQTT =
                     User = envVar "User" 
                     Password = envVar "Password"
                 |}
-            MyMQTT.New
-            |> MyMQTT.SetUrl vars.URL vars.Port
-            |> MyMQTT.SetCredentials  vars.User vars.Password
-            |> MyMQTT.Connect
+            MqttConnection.New
+            |> MqttConnection.SetUrl vars.URL vars.Port
+            |> MqttConnection.SetCredentials  vars.User vars.Password
+            |> MqttConnection.Connect
     
     type MQTTObservableGeneric<'a> private () =
         member val private backingValue : 'a option = None with get, set
@@ -162,7 +162,7 @@ module FMQTT =
         member val private serializer : 'a -> string = (fun x -> x.ToString()) with get, set
         member val private deserializer : string -> 'a = (fun x -> failwith "needs fn") with get, set
         member val private hasReceivedCallback : bool = false with get, set
-        member val private client : MyMQTT option = None with get,set
+        member val private client : MqttConnection option = None with get,set
         
         member private this.SetBackingValue v = this.backingValue <- Some v
         

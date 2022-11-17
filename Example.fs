@@ -5,9 +5,9 @@ open FMQTT.FMQTT
 module Example = 
 
     // Connect to local mosquitto broker
-    let ConnectToLocal () : MyMQTT = 
-        MyMQTT.New
-        |> MyMQTT.SetUrl "localhost" 1883
-        |> MyMQTT.SetCredentials "mosquitoo" ""
-        |> MyMQTT.Connect
+    let ConnectToLocal () : MqttConnection = 
+        MqttConnection.New
+        |> MqttConnection.SetUrl "localhost" 1883
+        |> MqttConnection.SetCredentials "mosquitoo" ""
+        |> MqttConnection.Connect
 
