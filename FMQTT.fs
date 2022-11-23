@@ -13,10 +13,6 @@ open Utils
 open System.Linq
 [<AutoOpen>]
 module FMQTT = 
-    
-    let tee (x: 'obj -> unit) (y: 'obj) : 'obj =
-        x y
-        y
     let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) = System.Text.Encoding.ASCII.GetString(x.ApplicationMessage.Payload)
     let (|--) a b = a |> tee b
 
@@ -47,10 +43,13 @@ module FMQTT =
         static member Retain (b: ClientModel<_>)          = { b with Retain         = true }
         static member Topic x (b: ClientModel<_>)         = { b with Topic          = x }
         static member OnChange fn (b: ClientModel<'a>)    = { b with OnChangeStrong = fn }
+    
     let connections = new System.Collections.Generic.List<unit -> unit>()
+    
     let runAll x =
         connections
         |> Seq.iter (fun x -> x())
+    
     let t = new System.Timers.Timer(float 100)
     t.Elapsed.Add runAll
     t.Start()
@@ -66,7 +65,6 @@ module FMQTT =
         static member New = 
             let factory = new MqttFactory()
             let client = factory.CreateMqttClient()
-            
             {
                 BrokerName = ""
                 Factory = factory
@@ -108,9 +106,24 @@ module FMQTT =
             mq
 
         member private this.AddEVx topic fn =
-            if not <| this.EventHandlers_.ContainsKey topic then
-                this.EventHandlers_.[topic] <- new Collections.Generic.List<MqttApplicationMessageReceivedEventArgs -> unit>()
-            this.EventHandlers_.[topic].Add (fun x -> x |> fn)
+            let handlers = this.EventHandlers_
+            let q = handlers.ContainsKey topic
+            if not <| q then
+                let list = new Collections.Generic.List<MqttApplicationMessageReceivedEventArgs -> unit>()
+                if isNull list then failwith "Null list"
+                if isNull topic then failwith "Null topic"
+                if isNull handlers then failwith "Null handlers"
+                try
+                    handlers.Add(topic, list)
+                with ex -> 
+                    let q = 5
+                    if isNull list then failwith "Null list"
+                    if isNull topic then failwith "Null topic"
+                    if isNull handlers then failwith "Null handlers"
+                    ()
+            let qq = 55
+            let b = handlers.[topic]
+            b.Add (fun x -> x |> fn)
 
         member private this.AddEV model =
             this.AddEVx model.Topic (fun m -> m.ApplicationMessage.ConvertPayloadToString() |> model.OnChangeWeak)
@@ -209,7 +222,9 @@ module FMQTT =
         member val private client : MqttConnection option = None with get,set
         member this.Topic() : string = this.clientModel.Topic
         member this.InitialValue() = this.initVal.Value
-        member private this.SetBackingValue v = this.backingValue <- Some v
+        member private this.SetBackingValue v = 
+            this.Topic() |> BREAK
+            this.backingValue <- Some v
         
         member this.Init() : unit =
             let onChange (stringToDeserialize: string) : unit = 
@@ -251,26 +266,35 @@ module FMQTT =
                 this.SetBackingValue this.initVal.Value
             
         static member Create mqttConnection (serialize: 'a -> string) (deserialize: string -> 'a) (defaultValue: 'a) (client: ClientModel<'a>) =
-            let t = new MQTTObservableGeneric<'a>()
-            t.clientModel <- client
-            t.serializer <- serialize
-            t.deserializer <- deserialize
-            t.initVal <- Some defaultValue
-            t.client <- Some mqttConnection
-            t.Init()
+            let ob = new MQTTObservableGeneric<'a>()
+            ob.clientModel <- client
+            ob.serializer <- serialize
+            ob.deserializer <- deserialize
+            ob.initVal <- Some defaultValue
+            ob.client <- Some mqttConnection
+            ob.Init()
             client.SendOnSubcribe
             |> function
             | MqttRetainHandling.SendAtSubscribe
             | MqttRetainHandling.SendAtSubscribeIfNewSubscriptionOnly -> 
-                t.WaitForCallback 1000
-                let q = t.hasReceivedCallback
-                if t.backingValue.IsNone  then 
-                    t.SetBackingValue t.initVal.Value
-                if not q then t.SetValue t.initVal.Value
+                let BREAK() = ob.Topic() |> BREAK
+                ob.WaitForCallback 1000
+                let hasReceivedCallback = ob.hasReceivedCallback
+                if ob.backingValue.IsNone then 
+                    BREAK()
+                    ob.SetBackingValue ob.initVal.Value
+                else
+                    BREAK()
+                if not hasReceivedCallback then 
+                    BREAK()
+                    ob.SetValue ob.initVal.Value
+                else
+                    BREAK()
+                    
             | MqttRetainHandling.DoNotSendOnSubscribe -> 
-                t.Value <- defaultValue
+                ob.Value <- defaultValue
             | _ -> ()
-            t
+            ob
         
         static member CreateRetained<'a> mqttConnection (serialize: 'a -> string) (deserialize: string -> 'a) (onChange: 'a -> unit) (defaultValue: 'a) (topic: string) =
             ClientModel.Create<'a> topic
@@ -278,6 +302,36 @@ module FMQTT =
             |> ClientBuilder.Retain
             |> ClientBuilder.OnChange onChange
             |> MQTTObservableGeneric.Create mqttConnection serialize deserialize defaultValue
+        
+        static member CreateRetainedBool (mqttConnection: MqttConnection) (onChange: bool -> unit) defaultValue topic : MQTTObservableGeneric<bool> = 
+            mqttConnection.EnsureConnected()
+            MQTTObservableGeneric.CreateRetained<bool>
+                mqttConnection
+                (fun (x: bool) -> x.ToString()) 
+                (fun s ->
+                    System.Boolean.TryParse s
+                    |> function
+                    | true, x -> x
+                    | false, _ -> false
+                    ) 
+                onChange 
+                defaultValue
+                topic
+    type MQTTObservable =
+        static member CreateRetainedInt (mqttConnection: MqttConnection) (onChange: int -> unit) defaultValue topic : MQTTObservableGeneric<int> = 
+            mqttConnection.EnsureConnected()
+            MQTTObservableGeneric.CreateRetained<int>
+                mqttConnection
+                (fun i -> i.ToString())
+                (fun i ->
+                    System.Int32.TryParse i
+                    |> function
+                    | true, i -> i
+                    | false, _ -> 0
+                    ) 
+                onChange 
+                defaultValue
+                topic
 
         static member CreateRetainedBool (mqttConnection: MqttConnection) (onChange: bool -> unit) defaultValue topic : MQTTObservableGeneric<bool> = 
             mqttConnection.EnsureConnected()
@@ -293,21 +347,3 @@ module FMQTT =
                 onChange 
                 defaultValue
                 topic
-    
-        static member CreateRetainedInt mqttConnection (onChange: int -> unit) defaultValue topic : MQTTObservableGeneric<int> = 
-            MQTTObservableGeneric.CreateRetained<int>
-                mqttConnection
-                (fun i -> i.ToString())
-                (fun i ->
-                    System.Int32.TryParse i
-                    |> function
-                    | true, i -> i
-                    | false, _ -> 0
-                    ) 
-                onChange 
-                defaultValue
-                topic
-                
-    type MQTTObservable =
-        static member CreateRetainedBool (mqttConnection: MqttConnection) (onChange: bool -> unit) defaultValue topic : MQTTObservableGeneric<bool> = 
-            MQTTObservableGeneric<bool>.CreateRetainedBool mqttConnection onChange defaultValue topic
