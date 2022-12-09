@@ -1,2 +1,4 @@
 ﻿FSharp.Core
 MQTTnet
+#MQTTnet.Extensions.ManagedClient
+System.Text.Json
