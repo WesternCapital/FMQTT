@@ -20,6 +20,7 @@
     <Compile Include="..\..\WesternCap\ExceptionalCode\Atomic.fs" Link="Atomic.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="FMQTT.fs" />
+    <Compile Include="Togglers.fs" />
     <Compile Include="Example.fs" />
     <None Include="paket.references" />
   </ItemGroup>
