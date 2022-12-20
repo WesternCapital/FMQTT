@@ -108,8 +108,6 @@ module FMQTT =
         static member UseTLS (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTls()}
         static member WithQOS qos (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithWillQualityOfServiceLevel qos}
 
-
-
         member this.EnsureConnected() =
             let rec connect depth mq =
                 let r = mq.Client.IsConnected
