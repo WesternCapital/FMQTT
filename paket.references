@@ -2,3 +2,4 @@
 MQTTnet
 #MQTTnet.Extensions.ManagedClient
 System.Text.Json
+System.Memory
