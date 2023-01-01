@@ -311,6 +311,9 @@ module FMQTT =
                 |> fun x -> this.PrevValue <- Some x
 
                 this.hasReceivedCallback <- true
+            //System.Diagnostics.Debugger.Launch() |> ignore
+            //System.Diagnostics.Debugger.Break() |> ignore
+            //this.client.Value.EnsureConnected()
             this.client.Value.SubscribeToTopicWithModel
                 { this.clientModel with OnChangeWeak = onChange }
             ()
