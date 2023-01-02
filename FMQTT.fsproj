@@ -17,6 +17,8 @@
     <DefineConstants>TRACE;FMQTT</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <None Include=".refs" />
+    <None Include="paket.references" />
     <None Include="App.config" />
     <Compile Include="..\..\WesternCap\ExceptionalCode\Operators.fs" Link="Operators.fs" />
     <Compile Include="..\..\WesternCap\ExceptionalCode\Atomic.fs" Link="Atomic.fs" />
@@ -24,7 +26,6 @@
     <Compile Include="FMQTT.fs" />
     <Compile Include="Togglers.fs" />
     <Compile Include="Example.fs" />
-    <None Include="paket.references" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <ItemGroup>
@@ -34,4 +35,5 @@
     <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
   </Target>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
+
 </Project>
