@@ -50,10 +50,10 @@ module FMQTT =
         static member Topic x (b: ClientModel<_>)         = { b with Topic          = x }
         static member OnChange fn (b: ClientModel<'a>)    = { b with OnChangeStrong = fn }
 
-    let _connections = new Generic.List<unit -> unit>()
+    let _connections = new List<unit -> unit>()
     let AddConnection x = _connections.Add x
     let runAll x =
-        let l = new Generic.List<unit -> unit>(_connections)
+        let l = new List<unit -> unit>(_connections)
         l
         |> Seq.iter (fun x -> x())
 
@@ -89,7 +89,7 @@ module FMQTT =
             |-- fun x ->
                     x.Client.add_ApplicationMessageReceivedAsync(fun (eventArgs: MqttApplicationMessageReceivedEventArgs) ->
                         if x.EventHandlers_.ContainsKey eventArgs.ApplicationMessage.Topic then
-                            ExceptionalCode.Atomic.TryRepeatedly
+                            TryRepeatedly
                                 10
                                 10
                                 (fun () ->
@@ -115,7 +115,7 @@ module FMQTT =
                     mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
                 with ex ->
                     if depth < 10 then
-                        System.Threading.Thread.Sleep 100
+                        Thread.Sleep 100
                         connect (depth + 1) mq
             if not this.Client.IsConnected then
                 try
@@ -130,7 +130,7 @@ module FMQTT =
             let handlers = this.EventHandlers_
             let q = handlers.ContainsKey topic
             if not <| q then
-                let list = new Collections.Generic.List<MqttApplicationMessageReceivedEventArgs -> unit>()
+                let list = new List<MqttApplicationMessageReceivedEventArgs -> unit>()
                 if isNull list then failwith "Null list"
                 if isNull topic then failwith "Null topic"
                 if isNull handlers then failwith "Null handlers"
@@ -212,7 +212,7 @@ module FMQTT =
             let envVar n =
                 let getVar userLevel =
                     let k = $"MQTT_{n}"
-                    let envVars = System.Environment.GetEnvironmentVariables(userLevel)
+                    let envVars = Environment.GetEnvironmentVariables(userLevel)
                     if envVars.Contains k then Some <| envVars.[k].ToString()
                     else None
                 getVar EnvironmentVariableTarget.User
@@ -323,7 +323,7 @@ module FMQTT =
 
         static member GetValueFromEXE topic timeout (onOutput: (string -> unit) option) (onError: (string -> unit) option) (cleanOutputFn: string list -> string list) (procStartInfo: ProcessStartInfo) =
             let vars = MqttConnection.GetEnvVars()
-            let psi = new System.Diagnostics.ProcessStartInfo(@"C:\Program Files\mosquitto\mosquitto_sub.exe")
+            let psi = new ProcessStartInfo(@"C:\Program Files\mosquitto\mosquitto_sub.exe")
             psi.Arguments <- $"-h localhost -t {topic}"
             RunProcessStartInfoWithOutputFullest timeout onOutput onError cleanOutputFn psi
             |> fun x -> x
@@ -335,7 +335,7 @@ module FMQTT =
             let ms = (float ms)
 
             while this.hasReceivedCallback |> not && DateTime.Now.Subtract(start).TotalMilliseconds < ms do
-                System.Threading.Thread.Sleep 10
+                Thread.Sleep 10
 
         override this.Value
             with get() : 'a =
@@ -401,7 +401,7 @@ module FMQTT =
                 mqttConnection
                 (fun (x: bool) -> x.ToString())
                 (fun s ->
-                    System.Boolean.TryParse s
+                    Boolean.TryParse s
                     |> function
                     | true, x -> x
                     | false, _ -> false
@@ -434,7 +434,7 @@ module FMQTT =
             MQTTObservable.CreateWithSerializers
                 (fun i -> i.ToString())
                 (fun i ->
-                    System.Int32.TryParse i
+                    Int32.TryParse i
                     |> function
                     | true, i -> i
                     | false, _ -> 0)
@@ -443,15 +443,15 @@ module FMQTT =
                 defaultValue
                 topic
 
-        static member CreateRetainedStringList (mqttConnection: MqttConnection) (onChange: System.Collections.Generic.List<string> -> unit) topic : MQTTObservableGeneric<System.Collections.Generic.List<string>> =
-            let newList = new System.Collections.Generic.List<string>()
+        static member CreateRetainedStringList (mqttConnection: MqttConnection) (onChange: List<string> -> unit) topic : MQTTObservableGeneric<List<string>> =
+            let newList = new List<string>()
             MQTTObservable.CreateWithSerializers
                 System.Text.Json.JsonSerializer.Serialize
                 (fun x ->
                     if (ns x) = "" then
                         newList
                     else
-                        System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<string>> x
+                        System.Text.Json.JsonSerializer.Deserialize<List<string>> x
                 )
                 mqttConnection
                 onChange
@@ -462,7 +462,7 @@ module FMQTT =
             MQTTObservable.CreateWithSerializers
                 str
                 (fun s ->
-                    System.Boolean.TryParse s
+                    Boolean.TryParse s
                     |> function
                     | true, x -> x
                     | false, _ -> false
