@@ -7,6 +7,7 @@
     <WarningsAsErrors>0025;3239;FS0001;FS0020;FS0025;FS0026;FS0193</WarningsAsErrors>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>TRACE;FMQTT;xUSEDISK</DefineConstants>
@@ -35,5 +36,4 @@
     <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
   </Target>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
-
 </Project>
