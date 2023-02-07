@@ -31,7 +31,7 @@
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <ItemGroup>
       <FSharpCoreResourcesFiles Include="$(OutputPath)**\FSharp.Core.resources.dll" />
-      <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles->'\%(Directory)') " />
+      <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles-&gt;'\%(Directory)') " />
     </ItemGroup>
     <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
   </Target>
