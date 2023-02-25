@@ -3,6 +3,7 @@ module internal Utils
     open System
     open System.Collections.Generic
     open System.Diagnostics
+    open ExceptionalCode
 
     let Trim(text: string): string =
         if isNull text then ""
@@ -50,7 +51,14 @@ module internal Utils
         let p = new Process(StartInfo = procStartInfo)
         p.OutputDataReceived.AddHandler(DataReceivedEventHandler(outputHandler outputs.Add))
         p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler errors.Add))
-        onOutput <|> fun fn -> p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler fn))
+        let r = (<|>)
+        
+        onOutput 
+        |> fun x -> x
+        <|> fun (fn: string -> unit) -> 
+                p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler fn))
+                |> fun x -> x
+                |> ignore
         onError  <|> fun fn -> p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler fn))
         let started =
             try

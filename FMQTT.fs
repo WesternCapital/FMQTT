@@ -1,22 +1,14 @@
 namespace FMQTT
 
 open ExceptionalCode
-open ExceptionalCode.Atomic
-open ExceptionalCode.Atomic2
-open System.Collections
 open MQTTnet.Client
 open MQTTnet
 open MQTTnet.Protocol
 open System.Threading
 open System.Threading.Tasks
-open MQTTnet
 open System
-open MQTTnet.Packets
 open System.Collections.Generic
 open Utils
-open System.Linq
-open System.Text.RegularExpressions
-open System.IO
 open System.Diagnostics
 
 [<AutoOpen>]

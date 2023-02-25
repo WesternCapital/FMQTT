@@ -1,39 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
+  <!-- Op: Project FMQTT Library -->
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
-    <WarnOn>3390;$(WarnOn)</WarnOn>
-    <WarningsAsErrors>0025;3239;FS0001;FS0020;FS0025;FS0026;FS0193</WarningsAsErrors>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
-    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <OptionCompare>Text</OptionCompare>
+    <OutputType>Library</OutputType>
+    <WarningsAsErrors>0025;3239;FS0001;FS0020;FS0025;FS0026;FS0193;FS0049</WarningsAsErrors>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>TRACE;FMQTT;xUSEDISK</DefineConstants>
-    <OtherFlags>
-    </OtherFlags>
+    <PreBuildEvent>del C:\DEV\temp\HP\C__DEV_Unexpected Error: Unrecognized project name: FMQTT_FMQTT_bin_Debug* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PreBuildEvent>del C:\DEV\temp\HP\C__DEV_Releases_FMQTT_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants>TRACE;FMQTT</DefineConstants>
+    <PreBuildEvent>del C:\DEV\temp\HP\C__DEV_Unexpected Error: Unrecognized project name: FMQTT_FMQTT_bin_Release* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <PreBuildEvent>del C:\DEV\temp\HP\C__DEV_Releases_FMQTT_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
+  </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <ItemGroup>
+      <FSharpCoreResourcesFiles Include="$(OutputPath)**\Terminal.Gui.resources.dll" />
+      <FSharpCoreResourcesFiles Include="$(OutputPath)**\FSharp.Core.resources.dll" />
+      <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles-&gt;'\%(Directory)') " />
+    </ItemGroup>
+    <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
+  </Target>
+  <!-- Op: End -->
   <ItemGroup>
     <None Include=".refs" />
     <None Include="paket.references" />
     <None Include="App.config" />
     <Compile Include="..\..\WesternCap\ExceptionalCode\Operators.fs" Link="Operators.fs" />
     <Compile Include="..\..\WesternCap\ExceptionalCode\Atomic.fs" Link="Atomic.fs" />
+    <Compile Include="..\..\WesternCap\ExceptionalCode\AtomicOperators.fs" Link="AtomicOperators.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="FMQTT.fs" />
     <Compile Include="Togglers.fs" />
     <Compile Include="Example.fs" />
   </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <ItemGroup>
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\FSharp.Core.resources.dll" />
-      <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles-&gt;'\%(Directory)') " />
-    </ItemGroup>
-    <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
-  </Target>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>
