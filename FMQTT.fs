@@ -315,7 +315,7 @@ module FMQTT =
 
         static member GetValueFromEXE topic timeout (onOutput: (string -> unit) option) (onError: (string -> unit) option) (cleanOutputFn: string list -> string list) (procStartInfo: ProcessStartInfo) =
             let vars = MqttConnection.GetEnvVars()
-            let psi = new ProcessStartInfo(@"C:\Program Files\mosquitto\mosquitto_sub.exe")
+            let psi = new ProcessStartInfo(@"mosquitto_sub.exe")
             psi.Arguments <- $"-h localhost -t {topic}"
             RunProcessStartInfoWithOutputFullest timeout onOutput onError cleanOutputFn psi
             |> fun x -> x
