@@ -106,9 +106,22 @@ module FMQTT =
                 try
                     mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
                 with ex ->
-                    if depth < 10 then
-                        Thread.Sleep 100
-                        connect (depth + 1) mq
+                    match ex with
+                    | :? AggregateException as ex -> 
+                        ex.InnerExceptions
+                        |> Seq.tryPick
+                            ^ function
+                                | :? InvalidOperationException as ex when ex.Message = "Not allowed to connect while connect/disconnect is pending." -> Some depth
+                                | _ -> None
+                        |> function
+                        | Some depth -> depth
+                        | None -> (depth + 1)
+                    | _ -> (depth + 1)
+                    |> fun x -> x
+                    |> fun (newDepth: int) -> 
+                        if newDepth < 10 then
+                            Thread.Sleep 100
+                            connect newDepth mq
             if not this.Client.IsConnected then
                 try
                     connect 0 this
