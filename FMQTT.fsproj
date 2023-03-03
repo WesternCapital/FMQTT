@@ -33,7 +33,7 @@
     </ItemGroup>
     <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
   </Target>
-  <!--ExcludeCultures  Include="cs;da;de;es;fa;fi;fr;it;ko;mk;nl;pl;pt;ru;sv;tr;zh-CN;ja;pt-br;zh-Hans-zh-Hant">
+  <!--ExcludeCultures> Include="cs;da;de;es;fa;fi;fr;it;ko;mk;nl;pl;pt;ru;sv;tr;zh-CN;ja;pt-br;zh-Hans-zh-Hant">
     <InProject>false</InProject>
   </ExcludeCultures -->
   <!-- Op: End -->
