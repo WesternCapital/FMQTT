@@ -15,9 +15,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PreBuildEvent>del C:\DEV\temp\HP\C__DEV_Unexpected Error: Unrecognized project name: FMQTT_FMQTT_bin_Debug* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
+    <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PreBuildEvent>del C:\DEV\temp\HP\C__DEV_Unexpected Error: Unrecognized project name: FMQTT_FMQTT_bin_Release* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
+    <OutputPath>bin\Release\</OutputPath>
   </PropertyGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <ItemGroup>
