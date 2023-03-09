@@ -252,41 +252,6 @@ module FMQTT =
 
         abstract Value : 'a with get, set
 
-    //and ProcessBuilderInfo =
-    //    {
-    //        timeout: int
-    //        path: string
-    //        args: string
-    //        argCollection: Map<string, string>
-    //        argCollection_NoArgPrefix: bool
-    //        argCollection_NoQuoteArgValue: bool
-    //        workingDir: DirectoryInfo option
-    //        waitForOutput: bool
-    //        randomBatchFileName: bool
-    //        createNoWindow: bool
-    //        pauseBatchFile: bool
-    //        cleanOutputFn: string list -> string list
-    //        onOutput: (string -> unit) option
-    //        onError: (string -> unit) option
-    //    }
-    //    static member Empty =
-    //        {
-    //            ProcessBuilderInfo.path = ""
-    //            argCollection = Map.empty
-    //            argCollection_NoArgPrefix = false
-    //            argCollection_NoQuoteArgValue = false
-    //            args = ""
-    //            timeout = 0
-    //            pauseBatchFile = false
-    //            workingDir = None
-    //            waitForOutput = false
-    //            randomBatchFileName = false
-    //            createNoWindow = false
-    //            cleanOutputFn = fun l -> l |?| (String.IsNullOrEmpty >> not)
-    //            onOutput = None
-    //            onError = None
-    //        }
-
     type MQTTObservableGeneric<'a when 'a: equality> internal () =
         inherit ObservableGeneric<'a>()
         interface IDisposable with
@@ -312,16 +277,15 @@ module FMQTT =
                     | None, nv -> this.clientModel.OnChangeStrong nv
                     | Some xx, nv when xx <> nv -> this.clientModel.OnChangeStrong nv
                     | (Some x, y) -> () //Skip, no change
-                    // | (None, y) -> () //Skip, no change
                 |> fun x -> this.PrevValue <- Some x
 
                 this.hasReceivedCallback <- true
-            //System.Diagnostics.Debugger.Launch() |> ignore
-            //System.Diagnostics.Debugger.Break() |> ignore
-            //this.client.Value.EnsureConnected()
-            this.client.Value.SubscribeToTopicWithModel
-                { this.clientModel with OnChangeWeak = onChange }
-            ()
+            
+            { 
+                this.clientModel with 
+                    OnChangeWeak = onChange 
+            }
+            |> this.client.Value.SubscribeToTopicWithModel
 
         member this.Publish() =
             this.client.Value.PublishMessage this.clientModel.Topic (this.serializer this.backingValue.Value)
