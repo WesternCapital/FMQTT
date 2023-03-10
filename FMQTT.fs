@@ -283,7 +283,7 @@ module FMQTT =
             
             { 
                 this.clientModel with 
-                    OnChangeWeak = onChange 
+                    OnChangeWeak = onChange
             }
             |> this.client.Value.SubscribeToTopicWithModel
 
