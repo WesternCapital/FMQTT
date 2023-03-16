@@ -3,7 +3,6 @@ module internal Utils
     open System
     open System.Collections.Generic
     open System.Diagnostics
-    open ExceptionalCode
 
     let Trim(text: string): string =
         if isNull text then ""
