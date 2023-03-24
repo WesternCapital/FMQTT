@@ -103,22 +103,23 @@ module FMQTT =
         member this.EnsureConnected() =
             let rec connect depth mq =
                 let r = mq.Client.IsConnected
+                if depth > 50 then failwith "Not that deep"
                 try
                     mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
                 with ex ->
                     match ex with
-                    | :? AggregateException as ex -> 
+                    | :? AggregateException as ex ->
                         ex.InnerExceptions
                         |> Seq.tryPick
                             ^ function
                                 | :? InvalidOperationException as ex when ex.Message = "Not allowed to connect while connect/disconnect is pending." -> Some depth
                                 | _ -> None
                         |> function
-                        | Some depth -> depth
+                        | Some depth -> depth + 1
                         | None -> (depth + 1)
                     | _ -> (depth + 1)
                     |> fun x -> x
-                    |> fun (newDepth: int) -> 
+                    |> fun (newDepth: int) ->
                         if newDepth < 10 then
                             Thread.Sleep 100
                             connect newDepth mq
@@ -280,9 +281,9 @@ module FMQTT =
                 |> fun x -> this.PrevValue <- Some x
 
                 this.hasReceivedCallback <- true
-            
-            { 
-                this.clientModel with 
+
+            {
+                this.clientModel with
                     OnChangeWeak = onChange
             }
             |> this.client.Value.SubscribeToTopicWithModel
@@ -378,6 +379,9 @@ module FMQTT =
                 onChange
                 defaultValue
                 topic
+
+        static member CreateRetainedBoolAction (mqttConnection: MqttConnection) (onChange: Action<bool>) defaultValue topic : MQTTObservableGeneric<bool> =
+            MQTTObservableGeneric<bool>.CreateRetainedBool mqttConnection (fun x -> onChange.Invoke x) defaultValue topic
 
     type MQTTObservable =
         static member private CreateWithSerializers s d (mqttConnection: MqttConnection) (onChange: 'a -> unit) defaultValue topic=
