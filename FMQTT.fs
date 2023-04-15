@@ -434,12 +434,12 @@ module FMQTT =
         static member CreateRetainedBool (mqttConnection: MqttConnection) (onChange: bool -> unit) defaultValue topic : MQTTObservableGeneric<bool> =
             MQTTObservable.CreateWithSerializers
                 str
-                (fun s ->
-                    Boolean.TryParse s
-                    |> function
+                (
+                    Boolean.TryParse
+                    >> function
                     | true, x -> x
                     | false, _ -> false
-                    )
+                )
                 mqttConnection
                 onChange
                 defaultValue
