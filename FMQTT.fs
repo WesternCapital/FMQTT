@@ -116,9 +116,8 @@ module FMQTT =
                                 | _ -> None
                         |> function
                         | Some depth -> depth + 1
-                        | None -> (depth + 1)
-                    | _ -> (depth + 1)
-                    |> fun x -> x
+                        | None -> depth + 1
+                    | _ -> depth + 1
                     |> fun (newDepth: int) ->
                         if newDepth < 10 then
                             Thread.Sleep 100
@@ -134,8 +133,7 @@ module FMQTT =
 
         member private this.AddEventBase topic fn : unit =
             let handlers = this.EventHandlers_
-            let q = handlers.ContainsKey topic
-            if not <| q then
+            if handlers.ContainsKey topic |> not then
                 let list = new List<MqttApplicationMessageReceivedEventArgs -> unit>()
                 if isNull list then failwith "Null list"
                 if isNull topic then failwith "Null topic"
@@ -147,10 +145,7 @@ module FMQTT =
                     if isNull list then failwith "Null list"
                     if isNull topic then failwith "Null topic"
                     if isNull handlers then failwith "Null handlers"
-                    ()
-            let qq = 55
-            let b = handlers.[topic]
-            b.Add (fun x -> x |> fn)
+            handlers.[topic].Add (fun x -> x |> fn)
 
         member private this.AddEvent model =
             this.AddEventBase model.Topic (fun m -> m.ApplicationMessage.ConvertPayloadToString() |> model.OnChangeWeak)
@@ -169,37 +164,11 @@ module FMQTT =
             this.EnsureConnected()
             this.Client.SubscribeAsync(subOptions, CancellationToken.None).Wait()
             this.AddEvent model
-            //if this.EventHandlers_.ContainsKey model.Topic then
-            //    let handlersForTopic = this.EventHandlers_.[model.Topic]
-            //    this.EventHandlers_.[model.Topic].Add
-            //        (fun x ->
-            //            handlersForTopic
-            //            |> Seq.iter (fun handler -> handler x)
-            //            x.ApplicationMessage.ConvertPayloadToString() |> model.OnChangeWeak
-            //        )
-            //else
-            //    let topicKey = model.Topic
-            //    let v (x: MqttApplicationMessageReceivedEventArgs) = x.ApplicationMessage.ConvertPayloadToString() |> model.OnChangeWeak
-            //    if this.EventHandlers.ContainsKey topicKey then
-            //        this.EventHandlers.[topicKey]
-            //    else
-            //        this.EventHandlers.[topicKey] <- new Collections.Generic.List<MqttApplicationMessageReceivedEventArgs -> unit>()
-            //        this.EventHandlers.[topicKey]
-            //    |> fun x -> x.Add(v)
-                //()
-            //this.Client.add_ApplicationMessageReceivedAsync(fun x ->
-            //    let y = x.ApplicationMessage.ConvertPayloadToString()
-            //    b.OnChangeWeak y
-            //    Task.CompletedTask
-            //)
+       
         member this.UnsubscribeFromTopic (topic: string) =
             this.Client.UnsubscribeAsync(topic).Wait()
 
-        //member this.SubscribeToTopicRegex (topicRegex: string) (fn: MqttApplicationMessageReceivedEventArgs -> unit) =
-        //    this.AddEventBase topic fn
-        //    this.Client.SubscribeAsync(topic).Wait()
         member this.SubscribeToTopic (topic: string) (fn: MqttApplicationMessageReceivedEventArgs -> unit) =
-            //let sub = this.Factory.CreateSubscribeOptionsBuilder() |> fun x -> x.WithTopicFilter(fun f -> f.WithTopic(topic) |> ignore).Build()
             this.AddEventBase topic fn
             this.Client.SubscribeAsync(topic).Wait()
 
@@ -207,7 +176,6 @@ module FMQTT =
 
         member this.PublishMessage (topic: string) (data: string) =
             let amb = (new MqttApplicationMessageBuilder()).WithRetainFlag().WithTopic(topic).WithPayload(data).Build()
-            //printfn "Sending message to mqtt..."
             try
                 this.Client.PublishAsync(amb, CancellationToken.None) |> ignore
             with ex ->
@@ -334,27 +302,8 @@ module FMQTT =
             client.SendOnSubcribe
             |> function
             | MqttRetainHandling.SendAtSubscribe
-            | MqttRetainHandling.SendAtSubscribeIfNewSubscriptionOnly ->
-                //let BREAK() = ob.Topic() |> BREAK
-                ob.WaitForCallback 1000
-                let hasReceivedCallback = ob.hasReceivedCallback
-                if ob.backingValue.IsNone then
-                    //BREAK()
-                    //ob.SetBackingValue ob.initVal.Value
-                    ()
-                else
-                    //BREAK()
-                    ()
-                if not hasReceivedCallback then
-                    //BREAK()
-                    //ob.SetValue ob.initVal.Value
-                    ()
-                else
-                    //BREAK()
-                    ()
-
-            | MqttRetainHandling.DoNotSendOnSubscribe ->
-                ob.Value <- defaultValue
+            | MqttRetainHandling.SendAtSubscribeIfNewSubscriptionOnly -> ob.WaitForCallback 1000
+            | MqttRetainHandling.DoNotSendOnSubscribe -> ob.Value <- defaultValue
             | _ -> ()
             ob
 
