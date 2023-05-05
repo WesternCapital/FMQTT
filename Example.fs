@@ -1,4 +1,4 @@
-﻿namespace FMQTT
+namespace FMQTT
 
 open FMQTT.FMQTT
 
@@ -10,4 +10,3 @@ module Example =
         |> MqttConnection.SetUrl "localhost" 1883
         |> MqttConnection.SetCredentials "mosquitoo" ""
         |> MqttConnection.Connect
-

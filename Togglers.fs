@@ -1,4 +1,4 @@
-﻿namespace FMQTT
+namespace FMQTT
 
 module Togglers =
     let MakeTogglerBase (mqtt: MqttConnection) name =
