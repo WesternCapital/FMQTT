@@ -41,6 +41,7 @@
     <None Include=".refs" />
     <None Include="paket.references" />
     <None Include="App.config" />
+    <Compile Include="..\..\WesternCap\ExceptionalCode\AtomicX.fs" Link="AtomicX.fs" />
     <Compile Include="..\..\WesternCap\ExceptionalCode\Operators.fs" Link="Operators.fs" />
     <Compile Include="..\..\WesternCap\ExceptionalCode\Atomic.fs" Link="Atomic.fs" />
     <Compile Include="..\..\WesternCap\ExceptionalCode\AtomicOperators.fs" Link="AtomicOperators.fs" />
