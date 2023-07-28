@@ -50,11 +50,10 @@ module internal Utils
         let p = new Process(StartInfo = procStartInfo)
         p.OutputDataReceived.AddHandler(DataReceivedEventHandler(outputHandler outputs.Add))
         p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler errors.Add))
-        let r = (<|>)
-        
-        onOutput 
+
+        onOutput
         |> fun x -> x
-        <|> fun (fn: string -> unit) -> 
+        <|> fun (fn: string -> unit) ->
                 p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler fn))
                 |> fun x -> x
                 |> ignore
