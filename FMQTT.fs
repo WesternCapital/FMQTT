@@ -164,7 +164,7 @@ module FMQTT =
             this.EnsureConnected()
             this.Client.SubscribeAsync(subOptions, CancellationToken.None).Wait()
             this.AddEvent model
-       
+
         member this.UnsubscribeFromTopic (topic: string) =
             this.Client.UnsubscribeAsync(topic).Wait()
 
