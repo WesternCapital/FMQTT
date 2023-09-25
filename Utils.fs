@@ -52,10 +52,8 @@ module internal Utils
         p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler errors.Add))
 
         onOutput
-        |> fun x -> x
         <|> fun (fn: string -> unit) ->
                 p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler fn))
-                |> fun x -> x
                 |> ignore
         onError  <|> fun fn -> p.ErrorDataReceived.AddHandler(DataReceivedEventHandler(outputHandler fn))
         let started =

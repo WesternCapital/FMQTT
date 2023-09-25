@@ -240,7 +240,6 @@ module FMQTT =
                     this.initVal.Value
                 |> this.SetBackingValue
                 this.backingValue.Value
-                |> fun x -> x
                 |-- fun nv ->
                     match this.PrevValue, nv with
                     | None, nv -> this.clientModel.OnChangeStrong nv
@@ -264,7 +263,6 @@ module FMQTT =
             let psi = new ProcessStartInfo(@"mosquitto_sub.exe")
             psi.Arguments <- $"-h localhost -t {topic}"
             RunProcessStartInfoWithOutputFullest timeout onOutput onError cleanOutputFn psi
-            |> fun x -> x
             |> ignore
             ()
 
