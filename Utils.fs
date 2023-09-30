@@ -8,13 +8,13 @@ module internal Utils
         if isNull text then ""
         else text.Trim()
 
-    let private tryParseWith (tryParseFunc: string -> (bool * _)) =
+    let private tryParseWith (tryParseFunc: string -> bool * _) =
         tryParseFunc
         >> function
         | true, v -> Some v
         | false, _ -> None
 
-    let private tryParseTrimmedWith (tryParseFunc: string -> (bool * 'b)) v = v |> Trim |> tryParseWith tryParseFunc
+    let private tryParseTrimmedWith (tryParseFunc: string -> bool * 'b) v = v |> Trim |> tryParseWith tryParseFunc
 
     let parseInt = tryParseTrimmedWith Int32.TryParse
 
@@ -28,7 +28,7 @@ module internal Utils
             Debugger.Break()
         ()
 
-    let noop x =
+    let noop _ =
         ()
 
     let ns x =
@@ -90,7 +90,7 @@ module internal Utils
                         ProcessID = p.Id
                         ExitCode = p.ExitCode
                     |}
-                let r = 5
+                let _ = 5
                 q
         |> function
         | Ok x -> x

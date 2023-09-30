@@ -44,7 +44,7 @@ module FMQTT =
 
     let _connections = new List<unit -> unit>()
     let AddConnection x = _connections.Add x
-    let runAll x =
+    let runAll _ =
         let l = new List<unit -> unit>(_connections)
         l
         |> Seq.iter (fun x -> x())
@@ -102,7 +102,7 @@ module FMQTT =
 
         member this.EnsureConnected() =
             let rec connect depth mq =
-                let r = mq.Client.IsConnected
+                let _ = mq.Client.IsConnected
                 if depth > 50 then failwith "Not that deep"
                 try
                     mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
@@ -141,7 +141,7 @@ module FMQTT =
                 try
                     handlers.TryAdd(topic, list) |> ignore
                 with ex ->
-                    let q = 5
+                    let _ = 5
                     if isNull list then failwith "Null list"
                     if isNull topic then failwith "Null topic"
                     if isNull handlers then failwith "Null handlers"
@@ -213,7 +213,7 @@ module FMQTT =
         member val internal backingValue : 'a option = None with get, set
         member val internal initVal : 'a option = None with get, set
         member val internal serializer : 'a -> string = (fun x -> x.ToString()) with get, set
-        member val internal deserializer : string -> 'a = (fun x -> failwith "needs fn") with get, set
+        member val internal deserializer : string -> 'a = (fun _ -> failwith "needs fn") with get, set
         member val PrevValue : 'a option = None with get, set
         member internal this.SetBackingValue v = this.backingValue <- Some v
         member this.InitialValue() = this.initVal.Value
@@ -244,7 +244,7 @@ module FMQTT =
                     match this.PrevValue, nv with
                     | None, nv -> this.clientModel.OnChangeStrong nv
                     | Some xx, nv when xx <> nv -> this.clientModel.OnChangeStrong nv
-                    | (Some x, y) -> () //Skip, no change
+                    | Some _, _ -> () //Skip, no change
                 |> fun x -> this.PrevValue <- Some x
 
                 this.hasReceivedCallback <- true
@@ -258,8 +258,8 @@ module FMQTT =
         member this.Publish() =
             this.client.Value.PublishMessage this.clientModel.Topic (this.serializer this.backingValue.Value)
 
-        static member GetValueFromEXE topic timeout (onOutput: (string -> unit) option) (onError: (string -> unit) option) (cleanOutputFn: string list -> string list) (procStartInfo: ProcessStartInfo) =
-            let vars = MqttConnection.GetEnvVars()
+        static member GetValueFromEXE topic timeout (onOutput: (string -> unit) option) (onError: (string -> unit) option) (cleanOutputFn: string list -> string list) (_: ProcessStartInfo) =
+            let _ = MqttConnection.GetEnvVars()
             let psi = new ProcessStartInfo(@"mosquitto_sub.exe")
             psi.Arguments <- $"-h localhost -t {topic}"
             RunProcessStartInfoWithOutputFullest timeout onOutput onError cleanOutputFn psi
