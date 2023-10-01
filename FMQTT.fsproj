@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- Op: Project FMQTT Library -->
+  <!-- Op: Project FMQTT Library net472 -->
   <PropertyGroup>
     <TargetFramework>net472</TargetFramework>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
