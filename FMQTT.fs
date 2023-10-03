@@ -1,16 +1,18 @@
 namespace FMQTT
-
-open ExceptionalCode
-open MQTTnet.Client
-open MQTTnet
-open MQTTnet.Protocol
-open System.Threading
-open System.Threading.Tasks
+//Op: Auto
 open System
 open System.Collections.Generic
-open Utils
 open System.Diagnostics
+open System.Threading
+open System.Threading.Tasks
 
+open ExceptionalCode
+open Utils
+
+open MQTTnet
+open MQTTnet.Client
+open MQTTnet.Protocol
+//Op: End
 [<AutoOpen>]
 module FMQTT =
     let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) = System.Text.Encoding.ASCII.GetString(x.ApplicationMessage.Payload)
