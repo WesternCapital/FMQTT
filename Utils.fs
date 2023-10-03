@@ -65,7 +65,7 @@ module internal Utils
                 ex.Data.Add("filename", procStartInfo.FileName)
                 reraise ()
 
-        if not started then failwithf "Failed to start process %s" procStartInfo.FileName
+        if not started then failwithf $"Failed to start process %s{procStartInfo.FileName}"
         //printfn "Started %s %s with pid %i" procStartInfo.FileName procStartInfo.Arguments p.Id
 
         p.BeginOutputReadLine()
