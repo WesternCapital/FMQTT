@@ -15,7 +15,10 @@ open MQTTnet.Protocol
 //Op: End
 [<AutoOpen>]
 module FMQTT =
-    let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) = System.Text.Encoding.ASCII.GetString(x.ApplicationMessage.Payload)
+    let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) = 
+        x.ApplicationMessage.PayloadSegment
+        |> ToArray
+        |> System.Text.Encoding.ASCII.GetString
     let (|--) a b = a |> tee b
 
     type ClientModel<'a> =
@@ -99,7 +102,15 @@ module FMQTT =
         static member SetClientId (clientId: string) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithClientId(clientId)}
         static member SetUrl (url: string) (port: int) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTcpServer(url, port)}
         static member SetCredentials (user: string) (pass: string) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithCredentials(user, pass)}
-        static member UseTLS (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTls()}
+        static member UseTLS (mq: MqttConnection) = 
+            {
+                mq with 
+                    OptionsBuilder = 
+                        let q = new MqttClientTlsOptions()
+                        q.UseTls <- true
+                        mq.OptionsBuilder.WithTlsOptions(q)
+            }
+        //static member UseTLS (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTls()}
         static member WithQOS qos (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithWillQualityOfServiceLevel qos}
 
         member this.EnsureConnected() =
