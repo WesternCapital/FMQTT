@@ -16,8 +16,9 @@ open MQTTnet.Protocol
 [<AutoOpen>]
 module FMQTT =
     let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) = 
-        x.ApplicationMessage.PayloadSegment
-        |> ToArray
+        //x.ApplicationMessage.PayloadSegment
+        //|> ToArray
+        x.ApplicationMessage.Payload
         |> System.Text.Encoding.ASCII.GetString
     let (|--) a b = a |> tee b
 
@@ -105,10 +106,11 @@ module FMQTT =
         static member UseTLS (mq: MqttConnection) = 
             {
                 mq with 
-                    OptionsBuilder = 
-                        let q = new MqttClientTlsOptions()
-                        q.UseTls <- true
-                        mq.OptionsBuilder.WithTlsOptions(q)
+                    OptionsBuilder = mq.OptionsBuilder.WithTls()
+                    //OptionsBuilder = 
+                    //    let q = new MqttClientTlsOptions()
+                    //    q.UseTls <- true
+                    //    mq.OptionsBuilder.WithTlsOptions(q)
             }
         //static member UseTLS (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTls()}
         static member WithQOS qos (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithWillQualityOfServiceLevel qos}
