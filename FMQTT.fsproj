@@ -13,7 +13,7 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>false</IsPackable>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-    <AssemblyName>FMQTT</AssemblyName>
+    <RootNamespace>FMQTT</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PreBuildEvent>del C:\DEV\temp\HP\*bin_Debug_FMQTT_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
