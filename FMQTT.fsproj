@@ -18,13 +18,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PreBuildEvent>del C:\DEV\temp\HP\*bin_Debug_FMQTT_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>$(DefineConstants);FMQTT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FMQTT;NET472</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <PreBuildEvent>del C:\DEV\temp\HP\*bin_Release_FMQTT_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
     <PreBuildEvent>del C:\DEV\temp\HP\C__Dev_Releases_FMQTT_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>$(DefineConstants);FMQTT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FMQTT;NET472</DefineConstants>
   </PropertyGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <ItemGroup>
