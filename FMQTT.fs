@@ -20,6 +20,7 @@ module FMQTT =
         //|> ToArray
         x.ApplicationMessage.Payload
         |> System.Text.Encoding.ASCII.GetString
+    [<Obsolete("Please update this operator to |& to avoid order of operations bugs")>]
     let (|--) a b = a |> tee b
 
     type ClientModel<'a> =
@@ -84,7 +85,7 @@ module FMQTT =
             //                |> Seq.iter (fun q -> q xx)
             //            Task.CompletedTask
             //        )
-            |-- fun x ->
+            |& fun x ->
                     x.Client.add_ApplicationMessageReceivedAsync(fun (eventArgs: MqttApplicationMessageReceivedEventArgs) ->
                         if x.EventHandlers_.ContainsKey eventArgs.ApplicationMessage.Topic then
                             TryRepeatedly
@@ -98,7 +99,7 @@ module FMQTT =
                             |> ignore
                         Task.CompletedTask
                     )
-            |-- fun x -> x.EnsureConnected |> AddConnection
+            |& fun x -> x.EnsureConnected |> AddConnection
         static member SetBrokerName (bn: string) (mq: MqttConnection) = {mq with BrokerName = bn}
         static member SetClientId (clientId: string) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithClientId(clientId)}
         static member SetUrl (url: string) (port: int) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTcpServer(url, port)}
@@ -255,7 +256,7 @@ module FMQTT =
                     this.initVal.Value
                 |> this.SetBackingValue
                 this.backingValue.Value
-                |-- fun nv ->
+                |& fun nv ->
                     match this.PrevValue, nv with
                     | None, nv -> this.clientModel.OnChangeStrong nv
                     | Some xx, nv when xx <> nv -> this.clientModel.OnChangeStrong nv
