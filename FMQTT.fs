@@ -12,6 +12,8 @@ open Utils
 open MQTTnet
 open MQTTnet.Client
 open MQTTnet.Protocol
+open ExceptionalCode
+
 //Op: End
 [<AutoOpen>]
 module FMQTT =
@@ -51,17 +53,23 @@ module FMQTT =
 
     let _connections = new List<unit -> unit>()
     let AddConnection x = _connections.Add x
-    let runAll _ =
-        let l = new List<unit -> unit>(_connections)
-        l
+    let runAll x =
+        let connections = new List<unit -> unit>(_connections)
+        connections
         |> Seq.iter (fun x -> x())
 
     let t = new System.Timers.Timer(float 100)
     t.Elapsed.Add runAll
     t.Start()
 
+    type MqttConnectionStatus =
+        | New
+        | Connecting
+        | Connected
     type MqttConnection =
         {
+            mutable Status: MqttConnectionStatus
+            GUID: string
             BrokerName: string
             Factory: MqttFactory
             Client: IMqttClient
@@ -72,11 +80,15 @@ module FMQTT =
             let factory = new MqttFactory()
             let client = factory.CreateMqttClient()
             {
+                //Op: Auto
+                Status = MqttConnectionStatus.New
+                GUID = (System.Guid.NewGuid()).ToString()
                 BrokerName = ""
                 Factory = factory
                 Client = client
                 OptionsBuilder = new MqttClientOptionsBuilder()
                 EventHandlers_ = new System.Collections.Concurrent.ConcurrentDictionary<string, List<MqttApplicationMessageReceivedEventArgs -> unit>>()
+                //Op: End
             }
             //|-- fun x ->
             //        x.Client.add_ApplicationMessageReceivedAsync(fun (xx: MqttApplicationMessageReceivedEventArgs) ->
@@ -116,6 +128,49 @@ module FMQTT =
         //static member UseTLS (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTls()}
         static member WithQOS qos (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithWillQualityOfServiceLevel qos}
 
+        //member this.EnsureConnected() =
+        //    let rec connect depth mq =
+        //        depth >--> $"Depth {this.GUID} [{this.Status}]" |> fun (x: string) -> Console.WriteLine(x)
+                
+        //        while this.Status = MqttConnectionStatus.Connecting do
+        //            depth >--> $"Depth {this.GUID} [{this.Status}]" |> fun (x: string) -> Console.WriteLine(x)
+        //            sleep 100
+        //        if this.Status = MqttConnectionStatus.New then
+        //            this.Status <- MqttConnectionStatus.Connecting
+        //            let _ = mq.Client.IsConnected
+        //            if depth > 50 then failwith "Not that deep"
+        //            //depth >--> $"Depth {this.GUID}" |> fun (x: string) -> Console.WriteLine(x)
+        //            try
+        //                let q = mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
+        //                this.Status <- MqttConnectionStatus.Connected
+        //                depth >--> $"Depth {this.GUID} [{this.Status}]" |> fun (x: string) -> Console.WriteLine(x)
+        //                let r = 5
+        //                ()
+        //            with ex ->
+        //                match ex with
+        //                | :? AggregateException as ex ->
+        //                    ex.InnerExceptions
+        //                    |> Seq.tryPick
+        //                        ^ function
+        //                            | :? InvalidOperationException as ex when ex.Message = "Not allowed to connect while connect/disconnect is pending." -> Some depth
+        //                            | _ -> None
+        //                    |> function
+        //                    | Some depth ->
+        //                        Thread.Sleep 100
+        //                        depth + 1
+        //                    | None -> depth + 1
+        //                | _ -> depth + 1
+        //                |> fun (newDepth: int) ->
+        //                    if newDepth < 10 then
+        //                        Thread.Sleep 100
+        //                        connect newDepth mq
+        //    if not this.Client.IsConnected then
+        //        try
+        //            connect 0 this
+        //        with ex -> 
+        //            ex.Message |> Console.WriteLine
+        //            ()
+                        
         member this.EnsureConnected() =
             let rec connect depth mq =
                 let _ = mq.Client.IsConnected
