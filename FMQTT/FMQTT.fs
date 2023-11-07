@@ -12,12 +12,10 @@ open Utils
 open MQTTnet
 open MQTTnet.Client
 open MQTTnet.Protocol
-open ExceptionalCode
-
 //Op: End
 [<AutoOpen>]
 module FMQTT =
-    let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) = 
+    let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) =
         //x.ApplicationMessage.PayloadSegment
         //|> ToArray
         x.ApplicationMessage.Payload
@@ -81,11 +79,11 @@ module FMQTT =
             let client = factory.CreateMqttClient()
             {
                 //Op: Auto
-                Status = MqttConnectionStatus.New
-                GUID = (System.Guid.NewGuid()).ToString()
-                BrokerName = ""
-                Factory = factory
-                Client = client
+                Status         = MqttConnectionStatus.New
+                GUID           = (System.Guid.NewGuid()).ToString()
+                BrokerName     = ""
+                Factory        = factory
+                Client         = client
                 OptionsBuilder = new MqttClientOptionsBuilder()
                 EventHandlers_ = new System.Collections.Concurrent.ConcurrentDictionary<string, List<MqttApplicationMessageReceivedEventArgs -> unit>>()
                 //Op: End
@@ -116,11 +114,11 @@ module FMQTT =
         static member SetClientId (clientId: string) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithClientId(clientId)}
         static member SetUrl (url: string) (port: int) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithTcpServer(url, port)}
         static member SetCredentials (user: string) (pass: string) (mq: MqttConnection) = {mq with OptionsBuilder = mq.OptionsBuilder.WithCredentials(user, pass)}
-        static member UseTLS (mq: MqttConnection) = 
+        static member UseTLS (mq: MqttConnection) =
             {
-                mq with 
+                mq with
                     OptionsBuilder = mq.OptionsBuilder.WithTls()
-                    //OptionsBuilder = 
+                    //OptionsBuilder =
                     //    let q = new MqttClientTlsOptions()
                     //    q.UseTls <- true
                     //    mq.OptionsBuilder.WithTlsOptions(q)
@@ -131,7 +129,7 @@ module FMQTT =
         //member this.EnsureConnected() =
         //    let rec connect depth mq =
         //        depth >--> $"Depth {this.GUID} [{this.Status}]" |> fun (x: string) -> Console.WriteLine(x)
-                
+
         //        while this.Status = MqttConnectionStatus.Connecting do
         //            depth >--> $"Depth {this.GUID} [{this.Status}]" |> fun (x: string) -> Console.WriteLine(x)
         //            sleep 100
@@ -167,10 +165,10 @@ module FMQTT =
         //    if not this.Client.IsConnected then
         //        try
         //            connect 0 this
-        //        with ex -> 
+        //        with ex ->
         //            ex.Message |> Console.WriteLine
         //            ()
-                        
+
         member this.EnsureConnected() =
             let rec connect depth mq =
                 let _ = mq.Client.IsConnected
