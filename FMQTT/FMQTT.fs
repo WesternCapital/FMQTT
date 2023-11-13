@@ -244,6 +244,7 @@ module FMQTT =
         member this.SubscribeToTopicBasic (topic: string) (fn: string -> unit) = this.SubscribeToTopic topic (fun x -> x.ApplicationMessage.ConvertPayloadToString() |> fn)
 
         member this.PublishMessage (topic: string) (data: string) =
+            let topic = topic.Replace("+", "_PLUS_")
             let amb = (new MqttApplicationMessageBuilder()).WithRetainFlag().WithTopic(topic).WithPayload(data).Build()
             try
                 this.Client.PublishAsync(amb, CancellationToken.None) |> ignore
