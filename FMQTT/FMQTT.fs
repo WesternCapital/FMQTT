@@ -16,10 +16,10 @@ open MQTTnet.Protocol
 [<AutoOpen>]
 module FMQTT =
     let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) =
-        //x.ApplicationMessage.PayloadSegment
-        //|> ToArray
-        x.ApplicationMessage.Payload
-        |> System.Text.Encoding.ASCII.GetString
+        x.ApplicationMessage.PayloadSegment
+        |> ToArray
+        //x.ApplicationMessage.Payload
+        //|> System.Text.Encoding.ASCII.GetString
     [<Obsolete("Please update this operator to |& to avoid order of operations bugs")>]
     let (|--) a b = a |> tee b
 
