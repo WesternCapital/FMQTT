@@ -174,7 +174,9 @@ module FMQTT =
                 let _ = mq.Client.IsConnected
                 if depth > 50 then failwith "Not that deep"
                 try
-                    mq.Client.ConnectAsync(mq.OptionsBuilder.Build(), CancellationToken.None).Wait()
+                    let o = mq.OptionsBuilder.Build()
+                    o.ProtocolVersion <- Formatter.MqttProtocolVersion.V500
+                    mq.Client.ConnectAsync(o, CancellationToken.None).Wait()
                 with ex ->
                     match ex with
                     | :? AggregateException as ex ->
@@ -197,6 +199,7 @@ module FMQTT =
                 with ex -> ()
 
         static member Connect (mq: MqttConnection) =
+            
             mq.EnsureConnected()
             mq
 
@@ -218,7 +221,6 @@ module FMQTT =
 
         member private this.AddEvent model =
             this.AddEventBase model.Topic (fun m -> m.ApplicationMessage.ConvertPayloadToString() |> model.OnChangeWeak)
-
         member this.SubscribeToTopicWithModel (model: ClientModel<_>) =
             let subOptions =
                 this.Factory.CreateSubscribeOptionsBuilder()
