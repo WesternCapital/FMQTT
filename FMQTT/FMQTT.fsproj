@@ -18,6 +18,7 @@
     <RootNamespace>FMQTT</RootNamespace>
     <!--<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>-->
+    <NoWarn>FS3560</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <PreBuildEvent>del C:\DEV\temp\HP\*bin_Debug_FMQTT*_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
