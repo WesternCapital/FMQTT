@@ -463,6 +463,19 @@ module FMQTT =
                 onChange
                 defaultValue
                 topic
+        static member CreateRetainedWide (mqttConnection: MqttConnection) (onChange: obj -> unit) defaultValue topic : MQTTObservableGeneric<obj> =
+            MQTTObservable.CreateWithSerializers
+                str
+                (
+                    Boolean.TryParse
+                    >> function
+                    | true, x -> x
+                    | false, _ -> false
+                )
+                mqttConnection
+                onChange
+                defaultValue
+                topic
 #if USEDISK
     type DiskObservableGeneric<'a when 'a: equality> internal (topic) =
         inherit ObservableGeneric<'a>()
