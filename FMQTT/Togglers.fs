@@ -13,3 +13,4 @@ module Togglers =
             names.Value.Add name
             names.Publish()
         observableToggler
+    //let MakeToggler = FMQTT.Togglers.MakeTogglerBase mqtt.Value

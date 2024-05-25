@@ -476,6 +476,12 @@ module FMQTT =
                 onChange
                 defaultValue
                 topic
+    
+    //let CreateRetainedBool (mqtt: Lazy<MqttConnection>) (onChange: _ -> unit) defaultValue topic =
+    //    //mqtt.Value.EnsureConnected()
+    //    let v = mqtt.Value
+    //    MQTTObservable.CreateRetainedBool v onChange defaultValue topic
+
 #if USEDISK
     type DiskObservableGeneric<'a when 'a: equality> internal (topic) =
         inherit ObservableGeneric<'a>()
