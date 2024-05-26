@@ -1,7 +1,0 @@
-group Net8
-FSharp.Core
-FSharp.Data
-System.Text.Json
-System.Memory
-System.Runtime.CompilerServices.Unsafe
-MQTTnet
