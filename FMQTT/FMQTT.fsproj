@@ -39,7 +39,7 @@
       <FSharpCoreResourcesFiles Include="$(OutputPath)**\darwin-x64\**" />
       <FSharpCoreResourcesFiles Include="$(OutputPath)**\linux-x64\**" />
       <FSharpCoreResourcesFiles Include="$(OutputPath)**\linux-arm64\**" />
-      <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles-&gt;'\%(Directory)') " />
+      <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles->'\%(Directory)') " />
     </ItemGroup>
     <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
   </Target>
@@ -50,13 +50,24 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants>$(DefineConstants);FMQTT</DefineConstants>
   </PropertyGroup>-->
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>FischGeek.FMQTT</PackageId>
+    <Title>FischGeek.FMQTT</Title>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <Description>
+      Wrapper library around MQTTnet for use in F# projects
+    </Description>
+    <!--<RepositoryUrl>https://github.com/fischgeek/PlaywrightUtilities</RepositoryUrl>-->
+    <!--<PackageReadmeFile>README.md</PackageReadmeFile>-->
+  </PropertyGroup>
   <ItemGroup>
     <None Include="paket.references" />
     <None Include="App.config" />
-    <Compile Include="..\..\..\WesternCap\ExceptionalCode\AtomicX.fs" Link="AtomicX.fs" />
-    <Compile Include="..\..\..\WesternCap\ExceptionalCode\Operators.fs" Link="Operators.fs" />
-    <Compile Include="..\..\..\WesternCap\ExceptionalCode\Atomic.fs" Link="Atomic.fs" />
-    <Compile Include="..\..\..\WesternCap\ExceptionalCode\AtomicOperators.fs" Link="AtomicOperators.fs" />
+    <Compile Include="AtomicX.fs" />
+    <Compile Include="Operators.fs" />
+    <Compile Include="Atomic.fs" />
+    <Compile Include="AtomicOperators.fs" />
     <Compile Include="Utils.fs" />
     <Compile Include="FMQTT.fs" />
     <Compile Include="Togglers.fs" />
