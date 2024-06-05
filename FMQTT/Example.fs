@@ -2,13 +2,19 @@ namespace FMQTT
 
 open FMQTT.FMQTT
 
-module Example =
-
+module LocalBroker =
     // Connect to local mosquitto broker
     let ConnectToLocal () : MqttConnection =
+        let password = System.Environment.GetEnvironmentVariable "MQTT_Password"
+        let url = System.Environment.GetEnvironmentVariable "MQTT_URL"
+        let port =
+            try
+                System.Environment.GetEnvironmentVariable "MQTT_Port" |> int
+            with _ -> 1883
+        let user = System.Environment.GetEnvironmentVariable "MQTT_User"
         MqttConnection.New
-        |> MqttConnection.SetUrl "localhost" 1883
-        |> MqttConnection.SetCredentials "mosquitoo" "" //is this a typo "mosquitoo"? Does it matter?
+        |> MqttConnection.SetUrl url port
+        |> MqttConnection.SetCredentials user password
         |> MqttConnection.Connect
 
 [<AutoOpen>]
