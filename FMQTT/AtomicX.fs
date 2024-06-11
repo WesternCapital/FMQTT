@@ -4,11 +4,8 @@ open System.Diagnostics
 open System.Text.RegularExpressions
 //Op: End
 [<AutoOpen>]
-#if EXCEPTIONALCODE || EXCEPTIONALCODE8
-module AtomicX =
-#else
+
 module internal AtomicX =
-#endif
     type hidden = DebuggerHiddenAttribute
 
     let IgnoreQuietly = ignore

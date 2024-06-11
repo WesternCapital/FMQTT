@@ -13,15 +13,9 @@ open System.Threading
 
 open ExceptionalCode
 //Op: End
-#if FRAMEWORK
-open JetBrains.Annotations
-#endif
+
 [<AutoOpen>]
-#if EXCEPTIONALCODE
-module Atomic =
-#else
 module internal Atomic =
-#endif
     let eq = (=)
     //Op: CorrectWhitespace
     //Op: IndentOn =

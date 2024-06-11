@@ -7,11 +7,7 @@ open System.Diagnostics
 open System.Text.RegularExpressions
 //Op: End
 [<AutoOpen>]
-#if EXCEPTIONALCODE
-module Operators =
-#else
 module internal Operators =
-#endif
     type Hide0Attribute = DebuggerHiddenAttribute
     type Hide1Attribute = DebuggerHiddenAttribute
     type Hide2Attribute = DebuggerHiddenAttribute
