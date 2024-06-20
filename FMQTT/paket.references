@@ -1,6 +1,6 @@
-﻿FSharp.Core
+﻿group Main
+FSharp.Core
 MQTTnet
-#MQTTnet.Extensions.ManagedClient
 System.Text.Json
 System.Memory
 System.Runtime.CompilerServices.Unsafe
