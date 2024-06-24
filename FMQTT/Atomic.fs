@@ -663,77 +663,7 @@ module internal Atomic =
         | [] -> None
         | x :: _ -> Some x
 
-    let WinMerge v1 v2 leftPostFix rightPostFix =
-        let mutable v1 = NormalizeLineEndings v1 "\r\n"
-        let mutable v2 = NormalizeLineEndings v2 "\r\n"
-        v1 <- v1.Trim()
-        v2 <- v2.Trim()
-
-        let IsSomething(obj : obj) : bool =
-            obj
-            |> function
-            | :? string as x -> String.IsNullOrWhiteSpace x |> not
-            | x -> x = null
-        let mutable leftPostFix = leftPostFix
-        let mutable rightPostFix = rightPostFix
-
-        if leftPostFix  |> IsSomething then leftPostFix  <- "-" + leftPostFix
-        if rightPostFix |> IsSomething then rightPostFix <- "-" + rightPostFix
-        let left = $@"c:\temp\Left{leftPostFix}"
-        let right = $@"c:\temp\Right{rightPostFix}"
-        File.WriteAllText(left, v1)
-        File.WriteAllText(right, v2)
-        if v1 = v2 then true
-        else
-            [
-                @"C:\Sync\PortableApps\WinMergePortable\WinMergePortable.exe"
-                @"C:\Program Files (x86)\WinMerge\WinMergeU.exe"
-                @"c:\dev\PAUL\WinMerge\WinMergeU.exe"
-                @"D:\Program Files (x86)\WinMerge\WinMergeU.exe"
-            ]
-            |> FirstValidPathX
-            |> function
-            | Some wm -> Process.Start(wm, $"{left} {right}") |> ignore
-            | _ -> ()
-            false
-#if FRAMEWORK
-    let AreEqualWinMerge expected actual (trimLinesFirst: UniversalExtensions.Whitespace) expectedHeader actualHeader =
-        let trimLines (str : string) : string =
-            str |> Lines |+ Trim |> JoinLines
-
-        let excludeContextLines (code: string): string =
-            code
-            |> Lines
-            |?! fun x -> Regex.IsMatch(x, "__context:=")
-            |> JoinLines
-
-        let fn =
-            flip NormalizeLineEndings "\r\n"
-            >> match trimLinesFirst with
-                | UniversalExtensions.Whitespace.TrimLines ->
-                    trimLines
-                | UniversalExtensions.Whitespace.RemoveAllWhitespace ->
-                    fun x ->
-                        let re = Regex("[ \t]")
-                        re.Replace(x, "")
-
-                | _ -> id
-            >> Trim
-            >> excludeContextLines
-
-        try
-            if expected = actual then
-                ()
-            else
-                Assert.AreEqual expected actual
-        with ex ->
-            try
-                Assert.AreEqual (fn expected) (fn actual)
-            with ex ->
-                let vbCrLf = "\r\n"
-                let caller = ""
-                if WinMerge (expectedHeader + vbCrLf + expected) (actualHeader + vbCrLf + actual) caller caller |> not then reraise()
-#endif
+    
     let ContainsCI (nonRegexNeedle: string) (haystack: string) : bool =
         let nonRegexNeedle = nonRegexNeedle |> ns |> Regex.Escape
         let haystack = haystack |> ns

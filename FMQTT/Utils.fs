@@ -22,12 +22,6 @@ module internal Utils
         x y
         y
 
-    let BREAK t =
-        if str t = "Dev/Winmerge" then
-            //System.Diagnostics.Debugger.Launch() |> ignore
-            Debugger.Break()
-        ()
-
     let noop _ =
         ()
 
