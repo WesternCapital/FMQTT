@@ -6,9 +6,7 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <OutputType>Library</OutputType>
-    <WarningsAsErrors>0025;3239;FS0001;FS0020;FS0025;FS0026;FS0193;FS0049</WarningsAsErrors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsPackable>false</IsPackable>
     <Prefer32Bit>false</Prefer32Bit>
@@ -20,22 +18,6 @@
   <PropertyGroup>
     <!--<DefineConstants>$(DefineConstants);FMQTT;NETSTANDARD2_0</DefineConstants>-->
   </PropertyGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <ItemGroup>
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\Terminal.Gui.resources.dll" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\FSharp.Core.resources.dll" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\darwin-arm64\**" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\darwin-x64\**" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\linux-x64\**" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\linux-arm64\**" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\linux-x64\**" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\win-arm64\**" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\win-arm\**" />
-      <FSharpCoreResourcesFiles Include="$(OutputPath)**\unix\**" />
-      <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles-&gt;'\%(Directory)') " />
-    </ItemGroup>
-    <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
-  </Target>
   <!-- Op: End -->
   <!--<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>$(DefineConstants);FMQTT</DefineConstants>
