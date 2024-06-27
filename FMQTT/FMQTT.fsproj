@@ -7,7 +7,6 @@
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <OptionCompare>Text</OptionCompare>
     <OutputType>Library</OutputType>
     <WarningsAsErrors>0025;3239;FS0001;FS0020;FS0025;FS0026;FS0193;FS0049</WarningsAsErrors>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -16,20 +15,10 @@
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
     <AssemblyName>FMQTT</AssemblyName>
     <RootNamespace>FMQTT</RootNamespace>
-    <!--<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>-->
     <NoWarn>FS3560</NoWarn>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PreBuildEvent>del C:\DEV\temp\HP\*bin_Debug_FMQTT*_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>$(DefineConstants);FMQTT;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <PreBuildEvent>del C:\DEV\temp\HP\*bin_Release_FMQTT*_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
-    <PreBuildEvent>del C:\DEV\temp\HP\C__Dev_Releases_FMQTT*_* 1&gt;NUL 2&gt;NUL</PreBuildEvent>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>$(DefineConstants);FMQTT;NETSTANDARD2_0</DefineConstants>
+  <PropertyGroup>
+    <!--<DefineConstants>$(DefineConstants);FMQTT;NETSTANDARD2_0</DefineConstants>-->
   </PropertyGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <ItemGroup>
@@ -39,6 +28,10 @@
       <FSharpCoreResourcesFiles Include="$(OutputPath)**\darwin-x64\**" />
       <FSharpCoreResourcesFiles Include="$(OutputPath)**\linux-x64\**" />
       <FSharpCoreResourcesFiles Include="$(OutputPath)**\linux-arm64\**" />
+      <FSharpCoreResourcesFiles Include="$(OutputPath)**\linux-x64\**" />
+      <FSharpCoreResourcesFiles Include="$(OutputPath)**\win-arm64\**" />
+      <FSharpCoreResourcesFiles Include="$(OutputPath)**\win-arm\**" />
+      <FSharpCoreResourcesFiles Include="$(OutputPath)**\unix\**" />
       <FSharpCoreResourcesDirs Include="@(FSharpCoreResourcesFiles-&gt;'\%(Directory)') " />
     </ItemGroup>
     <RemoveDir Directories="@(FSharpCoreResourcesDirs)" />
