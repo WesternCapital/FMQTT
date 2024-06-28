@@ -3,17 +3,11 @@
   <!-- Op: Project _ Library netstandard2.0 -->
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
-    <GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources>
+    <!--GenerateResourceUsePreserializedResources>true</GenerateResourceUsePreserializedResources-->
     <OutputType>Library</OutputType>
+    <!--<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>-->
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-    <IsPackable>false</IsPackable>
-    <Prefer32Bit>false</Prefer32Bit>
-    <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-    <AssemblyName>FMQTT</AssemblyName>
-    <RootNamespace>FMQTT</RootNamespace>
-    <NoWarn>FS3560</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <!--<DefineConstants>$(DefineConstants);FMQTT;NETSTANDARD2_0</DefineConstants>-->
