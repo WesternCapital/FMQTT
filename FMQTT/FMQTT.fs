@@ -482,96 +482,95 @@ module FMQTT =
     //    let v = mqtt.Value
     //    MQTTObservable.CreateRetainedBool v onChange defaultValue topic
 
-#if USEDISK
-    type DiskObservableGeneric<'a when 'a: equality> internal (topic) =
-        inherit ObservableGeneric<'a>()
-        member this.DiskFile() = $@"c:\temp\mqtt\%s{topic |> FilePipe.CoerceValidFileName}"
-        member val callback : 'a -> unit = ignore with get, set
-        member this.Publish()=
-            let dx = new FileInfo(this.DiskFile())
-            if dx.Directory.Exists |> not then
-                dx.Directory.Create()
-            IO.File.WriteAllText(this.DiskFile(), this.backingValue.Value |> this.serializer)
-        override this.Value
-            with get() : 'a =
-                try
-                    IO.File.ReadAllText (this.DiskFile())
-                    |> this.deserializer
-                with ex ->
-                    this.initVal.Value
-                    |> this.SetValue
-                    this.Value
 
-            and set(newValue: 'a) =
-                this.SetBackingValue newValue
-                this.Publish()
-                this.callback newValue
+    //type DiskObservableGeneric<'a when 'a: equality> internal (topic) =
+    //    inherit ObservableGeneric<'a>()
+    //    member this.DiskFile() = $@"c:\temp\mqtt\%s{topic |> FilePipe.CoerceValidFileName}"
+    //    member val callback : 'a -> unit = ignore with get, set
+    //    member this.Publish()=
+    //        let dx = new FileInfo(this.DiskFile())
+    //        if dx.Directory.Exists |> not then
+    //            dx.Directory.Create()
+    //        IO.File.WriteAllText(this.DiskFile(), this.backingValue.Value |> this.serializer)
+    //    override this.Value
+    //        with get() : 'a =
+    //            try
+    //                IO.File.ReadAllText (this.DiskFile())
+    //                |> this.deserializer
+    //            with ex ->
+    //                this.initVal.Value
+    //                |> this.SetValue
+    //                this.Value
 
-        static member Create (serialize: 'a -> string) (deserialize: string -> 'a) cb (defaultValue: 'a) topic =
-            let ob = new DiskObservableGeneric<'a>(topic)
-            ob.serializer <- serialize
-            ob.deserializer <- deserialize
-            ob.initVal <- Some defaultValue
-            ob.callback <- cb
-            ob.Value |> ignore
-            ob
+    //        and set(newValue: 'a) =
+    //            this.SetBackingValue newValue
+    //            this.Publish()
+    //            this.callback newValue
 
-        static member CreateRetained<'a> (serialize: 'a -> string) (deserialize: string -> 'a) cb (defaultValue: 'a) (topic: string) : DiskObservableGeneric<'a> =
-            DiskObservableGeneric.Create serialize deserialize cb defaultValue topic
+    //    static member Create (serialize: 'a -> string) (deserialize: string -> 'a) cb (defaultValue: 'a) topic =
+    //        let ob = new DiskObservableGeneric<'a>(topic)
+    //        ob.serializer <- serialize
+    //        ob.deserializer <- deserialize
+    //        ob.initVal <- Some defaultValue
+    //        ob.callback <- cb
+    //        ob.Value |> ignore
+    //        ob
 
-    type DiskObservable =
-        static member private CreateWithSerializers s d cb defaultValue topic : DiskObservableGeneric<_> =
-            DiskObservableGeneric.CreateRetained
-                s
-                d
-                cb
-                defaultValue
-                topic
+    //    static member CreateRetained<'a> (serialize: 'a -> string) (deserialize: string -> 'a) cb (defaultValue: 'a) (topic: string) : DiskObservableGeneric<'a> =
+    //        DiskObservableGeneric.Create serialize deserialize cb defaultValue topic
 
-        static member CreateRetainedString cb defaultValue topic : DiskObservableGeneric<string> =
-            DiskObservable.CreateWithSerializers
-                id
-                id
-                cb
-                defaultValue
-                topic
+    //type DiskObservable =
+    //    static member private CreateWithSerializers s d cb defaultValue topic : DiskObservableGeneric<_> =
+    //        DiskObservableGeneric.CreateRetained
+    //            s
+    //            d
+    //            cb
+    //            defaultValue
+    //            topic
 
-        static member CreateRetainedInt cb defaultValue topic : DiskObservableGeneric<int> =
-            DiskObservable.CreateWithSerializers
-                (fun i -> i.ToString())
-                (fun i ->
-                    System.Int32.TryParse i
-                    |> function
-                    | true, i -> i
-                    | false, _ -> 0)
-                cb
-                defaultValue
-                topic
+    //    static member CreateRetainedString cb defaultValue topic : DiskObservableGeneric<string> =
+    //        DiskObservable.CreateWithSerializers
+    //            id
+    //            id
+    //            cb
+    //            defaultValue
+    //            topic
 
-        static member CreateRetainedStringList cb topic : DiskObservableGeneric<System.Collections.Generic.List<string>> =
-            let newList = new System.Collections.Generic.List<string>()
-            DiskObservable.CreateWithSerializers
-                System.Text.Json.JsonSerializer.Serialize
-                (fun x ->
-                    if (ns x) = "" then
-                        newList
-                    else
-                        System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<string>> x
-                )
-                cb
-                newList
-                topic
+    //    static member CreateRetainedInt cb defaultValue topic : DiskObservableGeneric<int> =
+    //        DiskObservable.CreateWithSerializers
+    //            (fun i -> i.ToString())
+    //            (fun i ->
+    //                System.Int32.TryParse i
+    //                |> function
+    //                | true, i -> i
+    //                | false, _ -> 0)
+    //            cb
+    //            defaultValue
+    //            topic
 
-        static member CreateRetainedBool (onChange: bool -> unit) defaultValue topic : DiskObservableGeneric<bool> =
-            DiskObservable.CreateWithSerializers
-                (fun (x: bool) -> x.ToString())
-                (fun s ->
-                    System.Boolean.TryParse s
-                    |> function
-                    | true, x -> x
-                    | false, _ -> false
-                    )
-                onChange
-                defaultValue
-                topic
-#endif
+    //    static member CreateRetainedStringList cb topic : DiskObservableGeneric<System.Collections.Generic.List<string>> =
+    //        let newList = new System.Collections.Generic.List<string>()
+    //        DiskObservable.CreateWithSerializers
+    //            System.Text.Json.JsonSerializer.Serialize
+    //            (fun x ->
+    //                if (ns x) = "" then
+    //                    newList
+    //                else
+    //                    System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<string>> x
+    //            )
+    //            cb
+    //            newList
+    //            topic
+
+    //    static member CreateRetainedBool (onChange: bool -> unit) defaultValue topic : DiskObservableGeneric<bool> =
+    //        DiskObservable.CreateWithSerializers
+    //            (fun (x: bool) -> x.ToString())
+    //            (fun s ->
+    //                System.Boolean.TryParse s
+    //                |> function
+    //                | true, x -> x
+    //                | false, _ -> false
+    //                )
+    //            onChange
+    //            defaultValue
+    //            topic

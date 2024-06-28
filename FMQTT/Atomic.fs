@@ -39,12 +39,7 @@ module internal Atomic =
             x <- x + 1
             if x > count then
                 failwith "Too many attempts"
-//    let dbg() =
-//#if DEBUG
-//        System.Diagnostics.Debugger.Launch() |> ignore
-//        //System.Diagnostics.Debugger.Break()
-//#endif
-//        ()
+
     type Is =
         static member GreaterThan a b = b > a
 
@@ -365,10 +360,10 @@ module internal Atomic =
                 RegexOptions = RegexOptions.IgnoreCase
                 MatchEvaluator = None
             }
-    #if !FRAMEWORK
+
     type RegexPatternAttribute() =
         inherit System.Attribute()
-    #endif
+
     type RX =
         //Op: CollapseWhitespaceKeepIndent
         //Op: IndentOn rb
@@ -717,8 +712,7 @@ module internal Atomic =
         | DirectoryFailure of (string * exn)
         | DirectoryInfoConstructorFailed of string
         | EmptyDirectoryPathProvided
-#if FRAMEWORK || NET6_0_Windows
-#endif
+
         static member ToOption =
             function
             | DirectoryExists x -> Some x

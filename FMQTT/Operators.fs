@@ -161,11 +161,7 @@ module internal Operators =
             |% b
 
 [<AutoOpen>]
-#if !FMQTT
-module ResultOperators =
-#else
 module internal ResultOperators =
-#endif
     let lift (fn: 'data -> 'error) (res: Result<'data,'c>) = res |> Result.bind (fn >> Ok)
 
     let (|>>%) leftFn rightFn = leftFn |> lift (Seq.iter rightFn)
