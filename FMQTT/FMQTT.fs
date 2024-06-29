@@ -476,7 +476,7 @@ module FMQTT =
                 onChange
                 defaultValue
                 topic
-    
+
     //let CreateRetainedBool (mqtt: Lazy<MqttConnection>) (onChange: _ -> unit) defaultValue topic =
     //    //mqtt.Value.EnsureConnected()
     //    let v = mqtt.Value
