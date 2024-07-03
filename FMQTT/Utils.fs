@@ -1,5 +1,7 @@
 module internal Utils
     open ExceptionalCode
+    open FMQTT.AtomicOperators
+    open FMQTT
     open System
     open System.Collections.Generic
     open System.Diagnostics

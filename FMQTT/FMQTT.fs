@@ -14,7 +14,7 @@ open MQTTnet.Client
 open MQTTnet.Protocol
 //Op: End
 [<AutoOpen>]
-module FMQTT =
+module FMQTTCore =
     let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) =
         x.ApplicationMessage.PayloadSegment
         |> ToArray

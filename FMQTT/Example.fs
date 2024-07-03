@@ -1,6 +1,6 @@
 namespace FMQTT
 
-open FMQTT.FMQTT
+open FMQTT.FMQTTCore
 
 module LocalBroker =
     // Connect to local mosquitto broker
