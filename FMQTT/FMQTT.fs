@@ -14,7 +14,7 @@ open MQTTnet.Client
 open MQTTnet.Protocol
 //Op: End
 [<AutoOpen>]
-module FMQTT =
+module FMQTTCore =
     let (|AsPayloadString|) (x: MqttApplicationMessageReceivedEventArgs) =
         x.ApplicationMessage.PayloadSegment
         |> ToArray
@@ -476,7 +476,7 @@ module FMQTT =
                 onChange
                 defaultValue
                 topic
-    
+
     //let CreateRetainedBool (mqtt: Lazy<MqttConnection>) (onChange: _ -> unit) defaultValue topic =
     //    //mqtt.Value.EnsureConnected()
     //    let v = mqtt.Value

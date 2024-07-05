@@ -658,7 +658,7 @@ module internal Atomic =
         | [] -> None
         | x :: _ -> Some x
 
-    
+
     let ContainsCI (nonRegexNeedle: string) (haystack: string) : bool =
         let nonRegexNeedle = nonRegexNeedle |> ns |> Regex.Escape
         let haystack = haystack |> ns

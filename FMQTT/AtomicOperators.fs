@@ -1,5 +1,5 @@
 // fsharplint:disable TypeNames PublicValuesNames MemberNames
-namespace ExceptionalCode
+namespace FMQTT
 
 open System.Diagnostics
 
@@ -8,6 +8,6 @@ module internal AtomicOperators =
     [<DebuggerHidden>]
     let (<|>) (a: 'a option) (b: 'a -> 'b) : unit =
         a
-        |> Option_SomeToFNQuiet b
+        |> ExceptionalCode.AtomicX.Option_SomeToFNQuiet b
 
     let inline (^) f a = f a
