@@ -2,6 +2,5 @@
 FSharp.Core
 MQTTnet
 System.Text.Json
-System.Memory
 System.Runtime.CompilerServices.Unsafe
 System.Text.Encodings.Web
