@@ -1,4 +1,4 @@
-﻿group Current
+﻿group Main
 FSharp.Core
 MQTTnet
 System.Text.Json
