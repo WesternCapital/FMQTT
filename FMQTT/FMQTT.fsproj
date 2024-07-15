@@ -29,7 +29,7 @@
     <Description>
       Wrapper library around MQTTnet for use in F# projects
     </Description>
-    <!--<RepositoryUrl>https://github.com/fischgeek/PlaywrightUtilities</RepositoryUrl>-->
+    <RepositoryUrl>https://github.com/westerncapital/fmqtt</RepositoryUrl>
     <!--<PackageReadmeFile>README.md</PackageReadmeFile>-->
   </PropertyGroup>
   <ItemGroup>
@@ -44,5 +44,5 @@
     <Compile Include="Togglers.fs" />
     <Compile Include="Example.fs" />
   </ItemGroup>
-  <Import Project="..\..\..\.paket\Paket.Restore.targets" />
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

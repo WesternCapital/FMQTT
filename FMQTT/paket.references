@@ -1,5 +1,4 @@
-﻿group Main
-FSharp.Core
+﻿FSharp.Core
 MQTTnet
 System.Text.Json
 System.Runtime.CompilerServices.Unsafe
