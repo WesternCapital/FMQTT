@@ -44,5 +44,8 @@
     <Compile Include="Togglers.fs" />
     <Compile Include="Example.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
